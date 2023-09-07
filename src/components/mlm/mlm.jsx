@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import './mlm.css'
-import { usePrepareContractWrite, useContractWrite, useAccount, useContractRead, useWaitForTransaction } from 'wagmi'
+import { usePrepareContractWrite, useContractWrite, useAccount, useContractRead } from 'wagmi'
 import TokenSale from '../../assets/artifacts/contracts/TokenSale.sol/TokenSale.json'
 import TokenSaleAdd from '../../assets/deployment/TokenSale.json'
 import USDTAdd from '../../assets/deployment/USDT.json'
@@ -99,8 +99,6 @@ const Mlm = () => {
         functionName: "approve",
         args: [TokenSaleAdd.address, Number(price.data)],
     })
-
-
 
     const { isLoading, write } = useContractWrite(config)
     const { write: approve, isLoading: Approving } = useContractWrite(usdtApprove)
@@ -209,7 +207,7 @@ const Mlm = () => {
                     <div className="mlm-content">
                         <div className='mlm-head'>Basic</div>
                         <div className='mlm-price'>100$
-                            <div>10$ for 10000 User <div className='status' style={statusstyle}></div><div>{String(slot.data)} User Buy</div></div>
+                            <div>10$ for 10000 User <div className='status' style={statusstyle}></div><div>{(slot.data).toString()} User Buy</div></div>
                         </div>
                         <div className='mlm-details'>
                             <div>Level : <span>1</span></div>

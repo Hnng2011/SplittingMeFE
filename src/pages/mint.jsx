@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useAccount } from 'wagmi';
 import { useContractWrite, usePrepareContractWrite, useContractRead } from 'wagmi'
 import AddSlot from '../assets/deployment/FactoryToken.json'
@@ -24,13 +24,13 @@ const TokenMint = ({ data }) => {
     })
 
     const { data: name } = useContractRead({
-        address: nftused[1],
+        address: nftused?.[1],
         abi: [TokenAbi.abi[13]],
         functionName: 'name',
     })
 
     const { data: symbol } = useContractRead({
-        address: nftused[1],
+        address: nftused?.[1],
         abi: [TokenAbi.abi[16]],
         functionName: 'symbol',
     })
@@ -43,7 +43,7 @@ const TokenMint = ({ data }) => {
     })
 
     const { config: minttoken } = usePrepareContractWrite({
-        address: nftused[1],
+        address: nftused?.[1],
         abi: [TokenAbi.abi[12]],
         functionName: 'mint',
         args: [address, quantityToken]
@@ -67,7 +67,7 @@ const TokenMint = ({ data }) => {
     return (
         <div className='list_mint_token'>
             {
-                nftused[2].toString() != data && <>
+                (String(nftused?.[2])) !== data && <>
                     <img src="https://lp-cms-production.imgix.net/image_browser/Ho%20Chi%20Minh%20City%20skyline.jpg?auto=format&w=1440&h=810&fit=crop&q=75" alt="splittingme" />
                     <div className='name_mint_token'>
                         <div>NFT id:</div>
@@ -86,7 +86,7 @@ const TokenMint = ({ data }) => {
             }
 
             {
-                nftused[2].toString() === data && <>
+                (String(nftused?.[2])) === data && <>
                     <img src="https://cdn-icons-png.flaticon.com/512/566/566295.png" alt="splittingme" />
                     <div className='name_mint_token'>
                         <div>Token Name:</div>
@@ -103,7 +103,6 @@ const TokenMint = ({ data }) => {
                     <button disabled={quantityToken === ''} className='mint_btn' onClick={() => mint?.()}>{isLoading2 ? 'Minting..' : 'Mint'}</button>
                 </>
             }
-
         </div >
     )
 }
@@ -189,7 +188,7 @@ const Mint = () => {
                     <div className='mint_token header'>Token Mint List</div>
                     {
                         data2?.map((data) => (
-                            <TokenMint key={String(data)} data={String(data)} />
+                            <TokenMint key={String(data)} data={data.toString()} />
                         ))
                     }
                 </div>
