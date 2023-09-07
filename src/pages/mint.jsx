@@ -86,7 +86,7 @@ const TokenMint = ({ data }) => {
             }
 
             {
-                (String(nftused?.[2])) === data && <>
+                (String(nftused?.[2])) === data && (String(nftused?.[2])) !== '0' && <>
                     <img src="https://cdn-icons-png.flaticon.com/512/566/566295.png" alt="splittingme" />
                     <div className='name_mint_token'>
                         <div>Token Name:</div>
