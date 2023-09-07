@@ -3,7 +3,6 @@ import Dashboard from "./Dashboard";
 import Explore from "./Explore02";
 import Home from "./Home";
 import Ranking from "./Ranking";
-import Wallet from "./Wallet";
 import Pool from "./pool";
 import ItemDetails from "./ItemDetails";
 import Mint from "./mint";
@@ -18,7 +17,6 @@ const routes = [
   { path: '/marketplace', component: <Explore /> },
   { path: '/dashboard', component: <Dashboard /> },
   { path: '/referal', component: <Ranking /> },
-  { path: '/wallet', component: <Wallet /> },
   { path: '/contact', component: <Contact /> },
   { path: '/item-details', component: <ItemDetails /> },
   { path: '/mint', component: <Mint /> },
