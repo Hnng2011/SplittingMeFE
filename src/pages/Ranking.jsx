@@ -1,10 +1,5 @@
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
-
 import img1 from '../assets/images/ranking/ranking-1.png'
-import img2 from '../assets/images/ranking/ranking-2.png'
-import img3 from '../assets/images/ranking/ranking-3.png'
-import img4 from '../assets/images/ranking/ranking-4.png'
 
 import { Link } from 'react-router-dom';
 
