@@ -1,11 +1,4 @@
 
-
-import img1 from '../images/slider/slider-product-1.jpg'
-import img2 from '../images/slider/slider-product-2.jpg'
-import img3 from '../images/slider/slider-product-3.jpg'
-import img4 from '../images/slider/slider-product-4.jpg'
-import img5 from '../images/slider/slider-product-5.jpg'
-
 const dataBanner2 = [
     {
         id: 1,

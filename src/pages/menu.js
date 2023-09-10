@@ -6,29 +6,38 @@ const menus = [
     },
     {
         id: 2,
-        name: 'Marketplace',
-        links: '/marketplace'
+        name: 'Swap',
+        links: '/swap'
     },
     {
         id: 3,
-        name: 'Referal',
-        links: '/referal',
-    },
-
-    {
-        id: 4,
         name: 'Pool',
         links: '/pool',
     },
-
     {
-        id: 6,
+        id: 4,
         name: 'Mint',
         links: '/mint'
     },
     {
+        id: 5,
+        name: 'Marketplace',
+        links: '/marketplace'
+    },
+    {
+        id: 6,
+        name: 'Lending',
+        links: '/lending',
+    },
+    {
         id: 7,
-        name: 'MLM',
+        name: 'Ranking',
+        links: '/referal',
+    },
+
+    {
+        id: 8,
+        name: 'Referal Program',
         links: '/mlm'
     }
 

@@ -33,7 +33,7 @@ function HotPick(props) {
                                         <div key={idx.id} className="col-xl-3 col-lg-4 col-md-6 col-sm-6 tf-loadmore 3d cyber">
                                             <div className="sc-product style2">
                                                 <div className="top">
-                                                    <Link to="/item-details" className="tag">{idx.title}</Link>
+                                                    <div className="tag">{idx.title}</div>
 
                                                 </div>
                                                 <div className="bottom">

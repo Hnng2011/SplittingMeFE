@@ -4,11 +4,9 @@ import imgscr from '../../assets/images/logo/logo.png'
 import menus from '../../pages/menu';
 import './styles.scss';
 
-import { useAccount, useConnect, useDisconnect } from 'wagmi'
+import { useAccount, useConnect } from 'wagmi'
 import { InjectedConnector } from 'wagmi/connectors/injected'
-import { Button } from 'react-bootstrap';
 // import Button from '../button';
-
 
 
 const Header = () => {

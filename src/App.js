@@ -10,6 +10,7 @@ import '../src/assets/font-awesome.css';
 import { WagmiConfig, createConfig, configureChains } from 'wagmi'
 import { sepolia } from 'wagmi/chains';
 import { publicProvider } from 'wagmi/providers/public'
+import { InjectedConnector } from 'wagmi/connectors/injected'
 
 const { publicClient, webSocketPublicClient } = configureChains(
     [sepolia],
@@ -18,6 +19,13 @@ const { publicClient, webSocketPublicClient } = configureChains(
 
 const config = createConfig({
     autoConnect: true,
+    connectors: [new InjectedConnector({
+        sepolia,
+        options: {
+            name: 'Injected',
+            shimDisconnect: true,
+        },
+    })],
     publicClient,
     webSocketPublicClient,
 })

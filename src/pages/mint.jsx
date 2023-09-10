@@ -1,93 +1,152 @@
 import { useState } from 'react';
 import { useAccount } from 'wagmi';
-import { useContractWrite, usePrepareContractWrite, useContractRead } from 'wagmi'
+import { useContractWrite, usePrepareContractWrite, useContractRead, useWaitForTransaction } from 'wagmi'
 import AddSlot from '../assets/deployment/FactoryToken.json'
 import AddSlotAbi from '../assets/artifacts/contracts/FactoryToken.sol/FactoryToken.json'
 import checkNFTAbi from '../assets/artifacts/contracts/NFT.sol/NFTSplittingME.json'
 import checkNFT from '../assets/deployment/NFTSplittingME.json'
 import TokenAbi from '../assets/artifacts/contracts/CampaignTypesTokenERC20.sol/CampaignTypesTokenERC20.json'
 import './mint.css'
+import { useEffect } from 'react';
 
 
-const TokenMint = ({ data }) => {
+function MintTokenList(data) {
     const { address } = useAccount()
-    const [nameToken, setNameToken] = useState("")
-    const [symbolToken, setSymbolToken] = useState("")
-    const [quantityToken, setQuantityToken] = useState('')
-
 
     const { data: nftused } = useContractRead({
         address: AddSlot.address,
         abi: [AddSlotAbi.abi[7]],
         functionName: 'campaignsByID',
-        args: [data]
+        args: [data],
+        enabled: Boolean[data]
     })
 
     const { data: name } = useContractRead({
         address: nftused?.[1],
         abi: [TokenAbi.abi[13]],
         functionName: 'name',
+        enabled: Boolean[nftused?.[1] && String(nftused?.[2]) !== '0']
     })
 
     const { data: symbol } = useContractRead({
         address: nftused?.[1],
         abi: [TokenAbi.abi[16]],
         functionName: 'symbol',
+        enabled: Boolean[nftused?.[1] && String(nftused?.[2]) !== '0']
     })
 
-    const { config } = usePrepareContractWrite({
+    const { data: quantity } = useContractRead({
+        address: nftused?.[1],
+        abi: [TokenAbi.abi[6]],
+        functionName: 'balanceOf',
+        args: [address],
+        enabled: Boolean[nftused?.[1] && String(nftused?.[2]) !== '0']
+    })
+
+    return { nftused, name, symbol, quantity }
+}
+
+const TokenMint = ({ data }) => {
+    const { address } = useAccount()
+    const [nameToken, setNameToken] = useState("")
+    const [symbolToken, setSymbolToken] = useState("")
+    const [quantityToken, setQuantityToken] = useState('')
+    const [reload, setReload] = useState(false)
+
+    const { nftused, name, symbol, quantity } = MintTokenList(data)
+
+    const { config: createCampaign } = usePrepareContractWrite({
         address: AddSlot.address,
         abi: [AddSlotAbi.abi[9]],
         functionName: 'createNewCampaign',
-        args: [nameToken, symbolToken, data]
+        args: [nameToken, symbolToken, data],
+        enabled: false,
     })
 
     const { config: minttoken } = usePrepareContractWrite({
         address: nftused?.[1],
         abi: [TokenAbi.abi[12]],
         functionName: 'mint',
-        args: [address, quantityToken]
+        args: [address, quantityToken],
+        enabled: false,
     })
 
 
-    const handlequant = (e) => {
-        const regex = /^[0-9]+$/;
-        if (regex.test(e.target.value)) {
-            setQuantityToken(e.target.value)
+    const handleinput = (e) => {
+        if (e.target.name === 'quantity') {
+            const regex = /^[0-9]+$/;
+            if (regex.test(e.target.value)) {
+                setQuantityToken(e.target.value)
+            }
+
+            if (e.target.value === '') {
+                setQuantityToken(e.target.value)
+            }
         }
 
-        if (e.target.value === '') {
-            setQuantityToken(e.target.value)
+        else if (e.target.name === 'tokenname') {
+            if ((e.target.value).length <= 15) {
+                setNameToken(e.target.value);
+            }
+        }
+
+        else if (e.target.name === 'tokensymbol') {
+            if ((e.target.value).length <= 7) {
+                setSymbolToken(e.target.value);
+            }
         }
     }
 
-    const { write, isLoading: isLoading } = useContractWrite(config)
-    const { write: mint, isLoading: isLoading2 } = useContractWrite(minttoken)
+    const showtokencontract = () => {
+        navigator.clipboard.writeText(String(nftused?.[1]))
+    }
+
+    const { write: create, isLoading, data: createcam } = useContractWrite(createCampaign)
+    const { write: mint, isLoading: isLoading2, data: minttok } = useContractWrite(minttoken)
+
+    const { isLoading: mintloading, isSuccess: mintsucces } = useWaitForTransaction({
+        hash: minttok?.hash,
+    })
+    const { isLoading: createloading, isSuccess: createsucces } = useWaitForTransaction({
+        hash: createcam?.hash,
+    })
+
+    useEffect(() => {
+        setReload(!reload)
+    }, [mintsucces, createsucces])
 
     return (
-        <div className='list_mint_token'>
+        <>
             {
-                (String(nftused?.[2])) !== data && <>
+
+                (String(nftused?.[2])) !== data &&
+                <div className='list_mint_token'>
                     <img src="https://lp-cms-production.imgix.net/image_browser/Ho%20Chi%20Minh%20City%20skyline.jpg?auto=format&w=1440&h=810&fit=crop&q=75" alt="splittingme" />
+
                     <div className='name_mint_token'>
+
                         <div>NFT id:</div>
                         <div>{data}</div>
                     </div>
                     <div className='quantity_mint_token_nft'>
                         <div> Token Name: </div>
-                        <input id="mintinput" type="text" value={nameToken} placeholder={'VD:Binance'} onChange={e => setNameToken(e.target.value)} />
+                        <input name='tokenname' id="mintinput" type="text" value={nameToken} placeholder={'VD:Binance'} onChange={e => handleinput(e)} />
                     </div>
                     <div className='quantity_mint_token'>
                         <div> Token Symbol:</div>
-                        <input id="mintinput" type="text" value={symbolToken} placeholder='VD:BNB' onChange={e => setSymbolToken(e.target.value)} />
+                        <input name='tokensymbol' id="mintinput" type="text" value={symbolToken} placeholder='VD:BNB' onChange={e => handleinput(e)} />
                     </div>
-                    <button className='mint_btn' onClick={() => write?.()}>{isLoading ? 'Creating..' : 'Create'}</button>
-                </>
+                    <button className='mint_btn' onClick={() => create?.()}>{(isLoading || createloading) ? 'Creating..' : 'Create'}</button>
+                </div>
             }
 
             {
-                (String(nftused?.[2])) === data && (String(nftused?.[2])) !== '0' && <>
-                    <img src="https://cdn-icons-png.flaticon.com/512/566/566295.png" alt="splittingme" />
+                (String(nftused?.[2])) === data && (String(nftused?.[2])) !== '0' &&
+                <div className='list_mint_token'>
+                    <div className='contract' onClick={() => showtokencontract()}>
+                        <div className='contract-header'>Copy Contract</div>
+                        <img src="https://cdn-icons-png.flaticon.com/512/566/566295.png" alt="splittingme" />
+                    </div>
                     <div className='name_mint_token'>
                         <div>Token Name:</div>
                         <div>{name}</div>
@@ -96,15 +155,20 @@ const TokenMint = ({ data }) => {
                         <div> Token Symbol: </div>
                         <div>{symbol}</div>
                     </div>
-                    <div className='quantity_mint_token'>
-                        <div> Token Quantity:</div>
-                        <input id="mintinput" type="text" value={quantityToken} placeholder='VD:100BNB' onChange={e => handlequant(e)} />
+                    <div className='quantity_mint_token_nft'>
+                        <div> Token Quantity: </div>
+                        <div>{String(quantity)}</div>
                     </div>
-                    <button disabled={quantityToken === ''} className='mint_btn' onClick={() => mint?.()}>{isLoading2 ? 'Minting..' : 'Mint'}</button>
-                </>
+                    <div className='quantity_mint_token'>
+                        <div> Tokens To Mint:</div>
+                        <input name='quantity' id="mintinput" type="text" value={quantityToken} placeholder='VD:1000' onChange={e => handleinput(e)} />
+                    </div>
+                    <button disabled={quantityToken === ''} className='mint_btn' onClick={() => mint?.()}>{(isLoading2 || mintloading) ? 'Minting..' : 'Mint'}</button>
+                </div>
             }
-        </div >
+        </>
     )
+
 }
 
 const Mint = () => {
@@ -124,36 +188,35 @@ const Mint = () => {
         address: AddSlot.address,
         abi: [AddSlotAbi.abi[12]],
         functionName: 'mintNFT',
-        args: ['https://lh3.googleusercontent.com/-Hdb99Sdv6V0/WE6NERQq7hI/AAAAAAAASBM/4pWAd08vrzMz4cJd5tmXvNXro8-v6HrUwCLcB/s0/lay-link-goole-photo_001.png'],
+        args: ['nullish'],
     })
 
-    const { data: data } = useContractRead({
+    const { data: SlotCheck } = useContractRead({
         address: AddSlot.address,
         abi: [AddSlotAbi.abi[15]],
         functionName: 'slotMintNFT',
         args: [findAdress],
+        enabled: Boolean[findAdress]
     })
 
-    const { data: data3 } = useContractRead({
+    const { data: Slot } = useContractRead({
         address: AddSlot.address,
         abi: [AddSlotAbi.abi[15]],
         functionName: 'slotMintNFT',
         args: [address],
+        enabled: Boolean[address]
     })
 
-    const { data: data2 } = useContractRead({
+    const { data: NFTList } = useContractRead({
         address: checkNFT.address,
         abi: [checkNFTAbi.abi[11]],
         functionName: 'getAllNFT',
         args: [address],
+        enabled: Boolean[address]
     })
 
-    const { isLoading: isLoading, isSuccess: isSuccess, write: write } = useContractWrite(addSlot)
-    const { isLoading: isLoading3, isSuccess: isSuccess3, write: write3 } = useContractWrite(mintNFT)
-
-    const handleMintNFT = () => {
-        write3?.()
-    }
+    const { isLoading, isSuccess, write: addslot } = useContractWrite(addSlot)
+    const { isLoading: isLoading3, isSuccess: isSuccess3, write: mintnft } = useContractWrite(mintNFT)
 
     const handleChangeMode = (mode) => {
         setMode(mode)
@@ -161,10 +224,9 @@ const Mint = () => {
 
     const handleAddAddress = () => {
         if (addAdress) {
-            write?.()
+            addslot?.()
         }
     }
-
     return (
 
         <div className='mint_container' >
@@ -177,8 +239,9 @@ const Mint = () => {
             {
                 mode === 'NFT' &&
                 <div className='mint_nft'>
-                    <img src='https://www.searchenginejournal.com/wp-content/uploads/2022/06/image-search-1600-x-840-px-62c6dc4ff1eee-sej-1280x720.png' alt='Splittingme' />
-                    <button disabled={String(data3) === '0'} onClick={() => handleMintNFT()}> {isLoading3 ? 'Pending' : String(data3) === '0' ? 'No Slot Left' : 'Mint'}</button>
+                    <i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i>
+                    <img src='https://cdn.dribbble.com/users/260537/screenshots/3981198/dribbble_animation.gif' alt='Splittingme' />
+                    <button disabled={String(Slot) === '0'} onClick={() => mintnft?.()}> {isLoading3 ? 'Pending' : String(Slot) === '0' ? 'No Slot Left' : 'Mint'}</button>
                     <div> {isSuccess3 ? "Success" : ''}</div>
                 </div>
             }
@@ -187,8 +250,8 @@ const Mint = () => {
                 mode === 'Token' && <div className='mint_token'>
                     <div className='mint_token header'>Token Mint List</div>
                     {
-                        data2?.map((data) => (
-                            <TokenMint key={String(data)} data={data.toString()} />
+                        NFTList?.map((data) => (
+                            String(data) != '0' && <TokenMint key={String(data)} data={data.toString()} />
                         ))
                     }
                 </div>
@@ -204,8 +267,7 @@ const Mint = () => {
 
                     <label className='.header'>Check Address to Mint</label>
                     <input type="text" name="addAdress" value={findAdress} onChange={e => setFindAdress(e.target.value)} />
-                    <label className='.header'>Status: {data ? `${String(data)} mint times` : ""}</label>
-
+                    <label className='.header'>Status: {SlotCheck ? `${String(SlotCheck)} mint times` : ""}</label>
                 </div>
             }
         </div >
