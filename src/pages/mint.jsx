@@ -2,20 +2,43 @@ import { useState } from 'react';
 import { useAccount } from 'wagmi';
 import { useContractWrite, usePrepareContractWrite, useContractRead, useWaitForTransaction } from 'wagmi'
 import AddSlot from '../assets/deployment/FactoryToken.json'
-import AddSlotAbi from '../assets/artifacts/contracts/FactoryToken.sol/FactoryToken.json'
-import checkNFTAbi from '../assets/artifacts/contracts/NFT.sol/NFTSplittingME.json'
 import checkNFT from '../assets/deployment/NFTSplittingME.json'
-import TokenAbi from '../assets/artifacts/contracts/CampaignTypesTokenERC20.sol/CampaignTypesTokenERC20.json'
 import './mint.css'
-import { useEffect } from 'react';
-
 
 function MintTokenList(data) {
     const { address } = useAccount()
 
     const { data: nftused } = useContractRead({
         address: AddSlot.address,
-        abi: [AddSlotAbi.abi[7]],
+        abi: [{
+            "inputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
+            "name": "campaignsByID",
+            "outputs": [
+                {
+                    "internalType": "address",
+                    "name": "owner",
+                    "type": "address"
+                },
+                {
+                    "internalType": "address",
+                    "name": "campaignAddress",
+                    "type": "address"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "NFTID",
+                    "type": "uint256"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        }],
         functionName: 'campaignsByID',
         args: [data],
         enabled: Boolean[data]
@@ -23,21 +46,63 @@ function MintTokenList(data) {
 
     const { data: name } = useContractRead({
         address: nftused?.[1],
-        abi: [TokenAbi.abi[13]],
+        abi: [{
+            "inputs": [],
+            "name": "name",
+            "outputs": [
+                {
+                    "internalType": "string",
+                    "name": "",
+                    "type": "string"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },],
         functionName: 'name',
         enabled: Boolean[nftused?.[1] && String(nftused?.[2]) !== '0']
     })
 
     const { data: symbol } = useContractRead({
         address: nftused?.[1],
-        abi: [TokenAbi.abi[16]],
+        abi: [{
+            "inputs": [],
+            "name": "symbol",
+            "outputs": [
+                {
+                    "internalType": "string",
+                    "name": "",
+                    "type": "string"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        }],
         functionName: 'symbol',
         enabled: Boolean[nftused?.[1] && String(nftused?.[2]) !== '0']
     })
 
     const { data: quantity } = useContractRead({
         address: nftused?.[1],
-        abi: [TokenAbi.abi[6]],
+        abi: [{
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "account",
+                    "type": "address"
+                }
+            ],
+            "name": "balanceOf",
+            "outputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        }],
         functionName: 'balanceOf',
         args: [address],
         enabled: Boolean[nftused?.[1] && String(nftused?.[2]) !== '0']
@@ -51,24 +116,60 @@ const TokenMint = ({ data }) => {
     const [nameToken, setNameToken] = useState("")
     const [symbolToken, setSymbolToken] = useState("")
     const [quantityToken, setQuantityToken] = useState('')
-    const [reload, setReload] = useState(false)
 
     const { nftused, name, symbol, quantity } = MintTokenList(data)
 
     const { config: createCampaign } = usePrepareContractWrite({
         address: AddSlot.address,
-        abi: [AddSlotAbi.abi[9]],
+        abi: [{
+            "inputs": [
+                {
+                    "internalType": "string",
+                    "name": "_name",
+                    "type": "string"
+                },
+                {
+                    "internalType": "string",
+                    "name": "_symbol",
+                    "type": "string"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "_NFTID",
+                    "type": "uint256"
+                }
+            ],
+            "name": "createNewCampaign",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        }],
         functionName: 'createNewCampaign',
         args: [nameToken, symbolToken, data],
-        enabled: false,
     })
 
     const { config: minttoken } = usePrepareContractWrite({
         address: nftused?.[1],
-        abi: [TokenAbi.abi[12]],
+        abi: [{
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "account",
+                    "type": "address"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "amount",
+                    "type": "uint256"
+                }
+            ],
+            "name": "mint",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },],
         functionName: 'mint',
         args: [address, quantityToken],
-        enabled: false,
     })
 
 
@@ -104,16 +205,12 @@ const TokenMint = ({ data }) => {
     const { write: create, isLoading, data: createcam } = useContractWrite(createCampaign)
     const { write: mint, isLoading: isLoading2, data: minttok } = useContractWrite(minttoken)
 
-    const { isLoading: mintloading, isSuccess: mintsucces } = useWaitForTransaction({
+    const { isLoading: mintloading } = useWaitForTransaction({
         hash: minttok?.hash,
     })
-    const { isLoading: createloading, isSuccess: createsucces } = useWaitForTransaction({
+    const { isLoading: createloading } = useWaitForTransaction({
         hash: createcam?.hash,
     })
-
-    useEffect(() => {
-        setReload(!reload)
-    }, [mintsucces, createsucces])
 
     return (
         <>
@@ -124,7 +221,6 @@ const TokenMint = ({ data }) => {
                     <img src="https://lp-cms-production.imgix.net/image_browser/Ho%20Chi%20Minh%20City%20skyline.jpg?auto=format&w=1440&h=810&fit=crop&q=75" alt="splittingme" />
 
                     <div className='name_mint_token'>
-
                         <div>NFT id:</div>
                         <div>{data}</div>
                     </div>
@@ -141,7 +237,7 @@ const TokenMint = ({ data }) => {
             }
 
             {
-                (String(nftused?.[2])) === data && (String(nftused?.[2])) !== '0' &&
+                (String(nftused?.[2])) === data &&
                 <div className='list_mint_token'>
                     <div className='contract' onClick={() => showtokencontract()}>
                         <div className='contract-header'>Copy Contract</div>
@@ -179,21 +275,63 @@ const Mint = () => {
 
     const { config: addSlot } = usePrepareContractWrite({
         address: AddSlot.address,
-        abi: [AddSlotAbi.abi[4]],
+        abi: [{
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "_address",
+                    "type": "address"
+                }
+            ],
+            "name": "addSlotMintNFT",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        }],
         functionName: 'addSlotMintNFT',
         args: [addAdress],
     })
 
     const { config: mintNFT } = usePrepareContractWrite({
         address: AddSlot.address,
-        abi: [AddSlotAbi.abi[12]],
+        abi: [{
+            "inputs": [
+                {
+                    "internalType": "string",
+                    "name": "_tokenURI",
+                    "type": "string"
+                }
+            ],
+            "name": "mintNFT",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        }],
         functionName: 'mintNFT',
         args: ['nullish'],
     })
 
     const { data: SlotCheck } = useContractRead({
         address: AddSlot.address,
-        abi: [AddSlotAbi.abi[15]],
+        abi: [{
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "",
+                    "type": "address"
+                }
+            ],
+            "name": "slotMintNFT",
+            "outputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        }],
         functionName: 'slotMintNFT',
         args: [findAdress],
         enabled: Boolean[findAdress]
@@ -201,7 +339,25 @@ const Mint = () => {
 
     const { data: Slot } = useContractRead({
         address: AddSlot.address,
-        abi: [AddSlotAbi.abi[15]],
+        abi: [{
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "",
+                    "type": "address"
+                }
+            ],
+            "name": "slotMintNFT",
+            "outputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        }],
         functionName: 'slotMintNFT',
         args: [address],
         enabled: Boolean[address]
@@ -209,7 +365,25 @@ const Mint = () => {
 
     const { data: NFTList } = useContractRead({
         address: checkNFT.address,
-        abi: [checkNFTAbi.abi[11]],
+        abi: [{
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "_owner",
+                    "type": "address"
+                }
+            ],
+            "name": "getAllNFT",
+            "outputs": [
+                {
+                    "internalType": "uint256[]",
+                    "name": "",
+                    "type": "uint256[]"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        }],
         functionName: 'getAllNFT',
         args: [address],
         enabled: Boolean[address]
@@ -251,7 +425,7 @@ const Mint = () => {
                     <div className='mint_token header'>Token Mint List</div>
                     {
                         NFTList?.map((data) => (
-                            String(data) != '0' && <TokenMint key={String(data)} data={data.toString()} />
+                            String(data) !== '0' && <TokenMint key={String(data)} data={data.toString()} />
                         ))
                     }
                 </div>

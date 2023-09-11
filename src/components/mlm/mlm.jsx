@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import './mlm.css'
 import { usePrepareContractWrite, useContractWrite, useAccount, useContractRead, useWaitForTransaction } from 'wagmi'
-import TokenSale from '../../assets/artifacts/contracts/TokenSale.sol/TokenSale.json'
 import TokenSaleAdd from '../../assets/deployment/TokenSale.json'
 import USDTAdd from '../../assets/deployment/USDT.json'
-import USDT from '../../assets/artifacts/contracts/USDT.sol/USDT.json'
 import lv1 from '../../assets/images/icon/level1.png'
 import lv2 from '../../assets/images/icon/level2.png'
 import lv3 from '../../assets/images/icon/level3.png'
@@ -21,7 +19,6 @@ import value1 from '../../assets/images/icon/value1.png'
 import value2 from '../../assets/images/icon/value2.png'
 import value3 from '../../assets/images/icon/value3.png'
 import value4 from '../../assets/images/icon/value4.png'
-import { useLocation } from 'react-router-dom'
 
 
 function Slot() {
@@ -105,15 +102,15 @@ function Allowance(address, tokensaleadd) {
         }],
         functionName: "allowance",
         args: [address, tokensaleadd],
-        enabled: Boolean(address),
     })
+
+    console.log(allowance.data)
 
     return allowance
 }
 
 const Mlm = () => {
     const { address, isConnected } = useAccount()
-    const location = useLocation();
     const [packages, setPackages] = useState(null)
     const [buying, setBuying] = useState(false)
 
@@ -124,7 +121,24 @@ const Mlm = () => {
 
     const { config: buyPackage } = usePrepareContractWrite({
         address: TokenSaleAdd.address,
-        abi: [TokenSale.abi[2]],
+        abi: [{
+            "inputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "_packageName",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "_usdtSend",
+                    "type": "uint256"
+                }
+            ],
+            "name": "buyPackage",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        }],
         functionName: "buyPackage",
         args: [packages, price.data],
         isDataEqual: (prev, next) => (prev === next ? prev : next),
@@ -132,7 +146,30 @@ const Mlm = () => {
 
     const { config: usdtApprove } = usePrepareContractWrite({
         address: USDTAdd.USDTAddress,
-        abi: [USDT.abi[4]],
+        abi: [{
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "spender",
+                    "type": "address"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "amount",
+                    "type": "uint256"
+                }
+            ],
+            "name": "approve",
+            "outputs": [
+                {
+                    "internalType": "bool",
+                    "name": "",
+                    "type": "bool"
+                }
+            ],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        }],
         functionName: "approve",
         args: [TokenSaleAdd.address, price?.data],
         isDataEqual: (prev, next) => (prev === next ? prev : next),
@@ -158,14 +195,9 @@ const Mlm = () => {
             approve?.()
         }
         else {
-            if (location.search) {
-
-            }
-            else {
-                buypackage?.()
-            }
-
+            buypackage?.()
         }
+
     }, [buying])
 
     useEffect(() => {

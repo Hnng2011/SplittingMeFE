@@ -3600,7 +3600,7 @@
 }
 
 .list_mint_token img {
-    width: 100%;
+    width: 5vw;
     aspect-ratio: 1 / 1;
     object-fit: cover;
     border-radius: 10px;
@@ -3654,7 +3654,7 @@
     .NFTswicthToken {
         display: flex;
         height: fit-content;
-        grid-column: span 5;
+        grid-column: span 3;
     }
 
 
