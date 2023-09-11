@@ -3651,25 +3651,12 @@
 }
 
 @media (max-width: 991px) {
-    .NFTswicthToken:nth-child(1) {
-        grid-row-start: 1;
-        grid-column-end: 3;
+    .NFTswicthToken {
+        display: flex;
+        height: fit-content;
+        grid-column: span 5;
     }
 
-    .NFTswicthToken:nth-child(1) {
-        grid-column-start: 2;
-        grid-column-end: 4;
-    }
-
-    .NFTswicthToken:nth-child(1) {
-        grid-column-start: 4;
-        grid-column-end: 6;
-    }
-
-    .NFTswicthToken:nth-child(1) {
-        grid-column-start: 6;
-        grid-column-end: 8;
-    }
 
     .mint_token,
     .mint_nft {

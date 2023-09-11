@@ -7,7 +7,6 @@ import { Modal } from 'react-bootstrap';
 const CardModal = (props) => {
 
     return (
-
         <Modal
             show={props.show}
             onHide={props.onHide}
@@ -18,7 +17,7 @@ const CardModal = (props) => {
 
 
             <div className="modal-body space-y-20 pd-40">
-                <p className="label-1">Enter quantity <span className="color-popup">- (5 Available)</span>
+                <p className="label-1">Enter quantity <span className="color-popup"></span>
                 </p>
                 <input type="text" className="form-control quantity form-bottom" />
                 {
@@ -35,11 +34,11 @@ const CardModal = (props) => {
                 }
                 <div className="d-flex justify-content-between detail-2">
                     <p> Service free:</p>
-                    <p className="text-right price color-popup"> 0,89 ETH </p>
+                    <p className="text-right price color-popup"> 0,89 USDC </p>
                 </div>
                 <div className="d-flex justify-content-between detail-3">
                     <p> Total amount:</p>
-                    <p className="text-right price color-popup"> 4 ETH </p>
+                    <p className="text-right price color-popup"> 4 USDC </p>
                 </div>
                 {
                     !props.mode

@@ -21,6 +21,7 @@ import value1 from '../../assets/images/icon/value1.png'
 import value2 from '../../assets/images/icon/value2.png'
 import value3 from '../../assets/images/icon/value3.png'
 import value4 from '../../assets/images/icon/value4.png'
+import { useLocation } from 'react-router-dom'
 
 
 function Slot() {
@@ -112,8 +113,10 @@ function Allowance(address, tokensaleadd) {
 
 const Mlm = () => {
     const { address, isConnected } = useAccount()
+    const location = useLocation();
     const [packages, setPackages] = useState(null)
     const [buying, setBuying] = useState(false)
+
 
     let price = Price(packages)
     let slot = Slot()
@@ -146,12 +149,22 @@ const Mlm = () => {
         setBuying((buying) => !buying);
     }
 
+    const copy = () => {
+        navigator.clipboard.writeText(window.location.href.split('?')[0] + `?referal=${address}`)
+    }
+
     useEffect(() => {
         if (String(allowance?.data) < String(price?.data)) {
             approve?.()
         }
         else {
-            buypackage?.()
+            if (location.search) {
+
+            }
+            else {
+                buypackage?.()
+            }
+
         }
     }, [buying])
 
@@ -229,7 +242,8 @@ const Mlm = () => {
                 <div className='outer'>
                     <div className="mlm-bg">S</div>
                     <div className="mlm-content">
-                        <div className='hot'>Hot</div>
+                        <div className='hot'>Hot
+                        </div>
                         <div className='mlm-head'>Basic</div>
                         <div className='mlm-price'>
                             100%
@@ -247,6 +261,8 @@ const Mlm = () => {
                     </div>
                 </div>
             </div>
+
+            {address && <div className='getreflink' onClick={() => copy()}>Get Referal Link</div>}
         </div>
     )
 }

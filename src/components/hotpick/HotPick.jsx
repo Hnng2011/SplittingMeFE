@@ -4,7 +4,7 @@ import './style.scss';
 import CardModal from '../layouts/CardModal';
 import icon1 from '../../assets/images/icon/rain1.svg'
 import icon2 from '../../assets/images/icon/rain2.svg'
-import icon3 from '../../assets/images/icon/ethe.svg'
+import icon3 from '../../assets/images/icon/usdc.svg'
 import { Link } from 'react-router-dom';
 
 HotPick.propTypes = {
@@ -60,12 +60,12 @@ function HotPick(props) {
                                                     <div className="price">
                                                         <div className="icon"><img src={icon3} alt="images" /></div>
                                                         <div className="content">
-                                                            <div className="name">ETH</div>
+                                                            <div className="name">USDC</div>
                                                             <div className="cash">{idx.price}</div>
                                                         </div>
                                                     </div>
                                                     <div className="product-button">
-                                                        <Link to='' onClick={() => setModalShow(true)} className="tf-button"> Purchase</Link>
+                                                        <Link to='' onClick={() => setModalShow(true)} className="tf-button">Purchase</Link>
                                                     </div>
                                                 </div>
 
