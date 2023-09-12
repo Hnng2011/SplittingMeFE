@@ -1,3 +1,92 @@
+.tf-baner-live-auction.active {
+    pointer-events: none;
+}
+
+.poolcreatelist h1 {
+    font-size: 12px;
+    padding: 0;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    width: fit-content;
+    padding: 10px;
+    cursor: pointer;
+    margin-left: 88%;
+}
+
+.createpool {
+    margin-left: 10%;
+    border-radius: 10px;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 10%;
+    gap: 5%;
+}
+
+.createpool span {
+    font-size: 20px;
+}
+
+
+.poolcreatelist {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    height: fit-content;
+    width: 30vw;
+    background-color: white;
+    color: black;
+    transform: translate(-50% , -50% );
+    box-shadow: 0px 0px 10px 35vw rgba(0, 0, 0, 0.416);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    border-radius: 10px;
+    z-index: 1000;
+}
+
+.inputpoolcreatelist {
+    margin-bottom: 10%;
+    outline: none;
+    border: none;
+}
+
+.inputpoolcreatelist label{
+    font-size: 20px;
+    margin-bottom: 3%;
+}
+
+.inputpoolcreatelist :where(input , select)  {
+    padding: 10px;
+    width: 100%;
+    border-radius: 10px;
+}
+
+.poolcreatelist .buttonCreate{
+    background-color: yellow;
+    color: black;
+    padding: 10px;
+    width: fit-content;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.optioning {
+    /* Tạo khoảng cách giữa Symbol và Quantity */
+    margin-right: 10px; /* Điều chỉnh khoảng cách theo ý muốn */
+    display: flex; /* Hiển thị các phần tử con theo chiều ngang */
+    align-items: center; /* Căn giữa các phần tử theo chiều dọc */
+  }
+  
+  .quantity {
+    /* Tùy chỉnh kiểu dáng của Quantity */
+    font-weight: bold;
+    color: #888;
+    margin-left: 10px; /* Điều chỉnh khoảng cách theo ý muốn */
+  }
+
 .grid-container {
     display: grid;
     width: 80%;

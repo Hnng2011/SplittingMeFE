@@ -5,8 +5,8 @@ function Pool({ datas }) {
     return (
         <div className='grid-container'>
 
-            {datas.map((data) => (
-                <div key={data.id} className='grid-items'>
+            {datas.map((data, idx) => (
+                <div key={idx} className='grid-items'>
                     <div className='grid-item'>
                         <img className="imaging" src={data.url} alt={data.name} />
                         <div className='name'>{data.name}</div>

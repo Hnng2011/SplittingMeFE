@@ -1,56 +1,59 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import CardModal from '../components/layouts/CardModal';
-import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
+import { Tabs, TabPanel } from 'react-tabs';
 import { Link } from 'react-router-dom';
 import img from '../assets/images/background/thumb-pagetitle.jpg'
 import avt from '../assets/images/author/author-db.jpg'
-import avt2 from '../assets/images/author/history-at2.jpg'
-import avt4 from '../assets/images/author/history-at4.jpg'
 import imgp7 from '../assets/images/product/product6.jpg'
-import avtp1 from '../assets/images/author/avt-fv1.jpg'
-import { useAccount } from 'wagmi';
-
-
-const invent = [
-    {
-        id: 0,
-        name: 'Sweet Baby #1',
-        author: 'Polly Walter',
-        quantity: 5
-    },
-    {
-        id: 1,
-        name: 'Swee Baby #2',
-        author: 'Polly Walter',
-        quantity: 4
-    },
-    {
-        id: 2,
-        name: 'Sweet Bab #3',
-        author: 'Polly Walter',
-        quantity: 3
-    }
-]
+import { useAccount, useContractRead } from 'wagmi';
+import checkNFT from '../assets/deployment/NFTSplittingME.json'
 
 
 const shortenMiddle = (inputString, keepLength) => {
-    if (inputString.length <= keepLength * 2) {
+    if (inputString?.length <= keepLength * 2) {
         return inputString;
     }
 
-    const start = inputString.slice(0, keepLength);
-    const end = inputString.slice(-keepLength);
+    const start = inputString?.slice(0, keepLength);
+    const end = inputString?.slice(-keepLength);
 
     return `${start}...${end}`;
 };
 
 function Dashboard() {
     const { address } = useAccount()
+    const { data } = useContractRead({
+        address: checkNFT.address,
+        abi: [{
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "_owner",
+                    "type": "address"
+                }
+            ],
+            "name": "getAllNFT",
+            "outputs": [
+                {
+                    "internalType": "uint256[]",
+                    "name": "",
+                    "type": "uint256[]"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        }],
+        functionName: 'getAllNFT',
+        args: [address],
+        enabled: Boolean[address]
+    })
+    const { nft, setNFT } = useState('')
 
     const [modalShow, setModalShow] = useState(false);
     const [mode, setMode] = useState('')
 
     const setSell = () => {
+        setNFT(nft)
         setModalShow(true)
         setMode('sell')
     }
@@ -88,8 +91,8 @@ function Dashboard() {
                                         <div className="avatar">
                                             <img src={avt} alt="images" />
                                         </div>
-                                        <div className="pax">{shortenMiddle(address, 9)}</div>
-                                        <div className="pax">Your SPM Balance: 78</div>
+                                        <div className="pax">{address && shortenMiddle(address, 9)}</div>
+                                        <div className="pax">{address && 'Your SPM Balance: 78'}</div>
                                     </div>
                                 </div>
                             </div>
@@ -100,36 +103,37 @@ function Dashboard() {
                                         <div className="table-ranking top">
                                             <div className="title-ranking">
                                                 <div className="col-rankingg"><Link to="#">Name</Link></div>
-                                                <div className="col-rankingg"><Link to="#">Quantity</Link></div>
 
                                             </div>
                                         </div>
                                         <div className="table-ranking ">
                                             {
-                                                invent.map((data) => {
-                                                    return (
-                                                        <div key={data.id} className="content-ranking">
-                                                            <div className="col-rankingg">
-                                                                <div className="box-product-favorite">
-                                                                    <Link to="#" className="bookmark"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                                                                        <path d="M12.7617 2.25H5.23828C4.42969 2.25 3.76172 2.91797 3.76172 3.76172V15.75L9 13.5L14.2383 15.75V3.76172C14.2383 2.91797 13.5703 2.25 12.7617 2.25Z" fill="#3749E9" />
-                                                                    </svg></Link>
-                                                                    <div className="image"><img src={imgp7} alt="Splittingme" /></div>
-                                                                    <Link to="#" className="name">{data.name}</Link>
+                                                data?.map((id) => {
+                                                    if (String(id) !== '0') {
+                                                        return (
+                                                            <div key={id} className="content-ranking">
+                                                                <div className="col-rankingg">
+                                                                    <div className="box-product-favorite">
+                                                                        <Link to="#" className="bookmark"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                                                                            <path d="M12.7617 2.25H5.23828C4.42969 2.25 3.76172 2.91797 3.76172 3.76172V15.75L9 13.5L14.2383 15.75V3.76172C14.2383 2.91797 13.5703 2.25 12.7617 2.25Z" fill="#3749E9" />
+                                                                        </svg></Link>
+                                                                        <div className="image"><img src={imgp7} alt="Splittingme" /></div>
+                                                                        <Link to="#" className="name">{String(id)}</Link>
+                                                                    </div>
                                                                 </div>
+
+
+                                                                <div className="col-rankingg">
+                                                                    {data?.quantity}
+                                                                </div>
+
+                                                                <div className="col-rankingg">
+                                                                    <Link to="#"><button onClick={() => setSell()} className='sell-btn'>Sell</button></Link>
+                                                                </div>
+
                                                             </div>
-
-
-                                                            <div className="col-rankingg">
-                                                                {data.quantity}
-                                                            </div>
-
-                                                            <div className="col-rankingg">
-                                                                <Link to="#"><button onClick={() => setSell()} className='sell-btn'>Sell</button></Link>
-                                                            </div>
-
-                                                        </div>
-                                                    )
+                                                        )
+                                                    }
                                                 })
                                             }
                                         </div>
@@ -146,6 +150,7 @@ function Dashboard() {
             <CardModal
                 show={modalShow}
                 mode={mode}
+                nft={nft}
                 onHide={() => { setModalShow(false); setMode('') }}
             />
         </div >

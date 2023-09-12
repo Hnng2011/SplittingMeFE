@@ -67,13 +67,7 @@ function Ranking(props) {
 
 
                     </div>
-                    <div className="col-md-12">
-                        <div className="tf-pagination">
-                            <Link to="#" className="tf-button active">1-25</Link>
-                            <Link to="#" className="tf-button">25-35</Link>
-                            <Link to="#" className="tf-button ">35-50</Link>
-                        </div>
-                    </div>
+
                 </div>
             </section>
 

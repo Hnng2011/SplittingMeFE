@@ -28,6 +28,7 @@
     "react-transition-group": "^4.4.2",
     "sass": "^1.50.0",
     "swiper": "^8.1.1",
+    "use-debounce": "^9.0.4",
     "viem": "^1.8.1",
     "wagmi": "^1.3.10",
     "web-vitals": "^2.1.4"

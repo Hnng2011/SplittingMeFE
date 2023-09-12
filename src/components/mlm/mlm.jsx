@@ -67,7 +67,7 @@ function Price(packages) {
         }],
         functionName: 'getPrice',
         args: [packages],
-        enabled: Boolean(packages)
+        enabled: (Boolean(packages) || packages === 0)
     });
 
     return price
@@ -75,7 +75,7 @@ function Price(packages) {
 
 function Allowance(address, tokensaleadd) {
     const allowance = useContractRead({
-        address: USDTAdd.USDTAddress,
+        address: USDTAdd.address,
         abi: [{
             "inputs": [
                 {
@@ -102,16 +102,14 @@ function Allowance(address, tokensaleadd) {
         }],
         functionName: "allowance",
         args: [address, tokensaleadd],
+        enabled: Boolean(address),
     })
-
-    console.log(allowance.data)
-
     return allowance
 }
 
 const Mlm = () => {
     const { address, isConnected } = useAccount()
-    const [packages, setPackages] = useState(null)
+    const [packages, setPackages] = useState('')
     const [buying, setBuying] = useState(false)
 
 
@@ -140,12 +138,13 @@ const Mlm = () => {
             "type": "function"
         }],
         functionName: "buyPackage",
-        args: [packages, price.data],
+        args: [packages, price?.data],
         isDataEqual: (prev, next) => (prev === next ? prev : next),
+        enabled: Boolean(price?.data),
     })
 
     const { config: usdtApprove } = usePrepareContractWrite({
-        address: USDTAdd.USDTAddress,
+        address: USDTAdd.address,
         abi: [{
             "inputs": [
                 {
@@ -173,6 +172,7 @@ const Mlm = () => {
         functionName: "approve",
         args: [TokenSaleAdd.address, price?.data],
         isDataEqual: (prev, next) => (prev === next ? prev : next),
+        enabled: Boolean(price?.data),
     })
 
     const { write: buypackage, isLoading } = useContractWrite(buyPackage)

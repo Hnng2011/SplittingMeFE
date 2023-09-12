@@ -123,7 +123,7 @@ const Swap = () => {
                     <div className='inputcontent'>
                         <input placeholder='0' value={quantity} onChange={(e) => setQuantity(e.target.value)}></input>
                         <div id='choosetoken' onClick={() => handleAddActiveClass()}>
-                            <img src={usdc} />
+                            <img src={usdc} alt='usdc' />
                             <h2>{symbol}</h2>
                             <img className="arrow" src={arrow} alt="down2" />
                         </div>
@@ -135,7 +135,7 @@ const Swap = () => {
                     <div className='inputcontent'>
                         <input placeholder='0' disabled></input>
                         <div>
-                            <img src={usdc} />
+                            <img src={usdc} alt='usdc' />
                             <h2>USDC</h2>
                         </div>
                     </div>

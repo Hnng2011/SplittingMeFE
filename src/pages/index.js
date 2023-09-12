@@ -1,4 +1,3 @@
-import Contact from "./Contact";
 import Dashboard from "./Dashboard";
 import Explore from "./Explore02";
 import Home from "./Home";

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { FreeMode, Thumbs, EffectCoverflow, Autoplay } from 'swiper';
 import { Swiper, SwiperSlide } from 'swiper/react';
 

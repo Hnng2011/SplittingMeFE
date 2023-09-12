@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
 import './style.scss';
 import CardModal from '../layouts/CardModal';
 import icon1 from '../../assets/images/icon/rain1.svg'
@@ -7,14 +6,9 @@ import icon2 from '../../assets/images/icon/rain2.svg'
 import icon3 from '../../assets/images/icon/usdc.svg'
 import { Link } from 'react-router-dom';
 
-HotPick.propTypes = {
-    data: PropTypes.array,
-};
-
-function HotPick(props) {
+function HotPick({ data }) {
 
     const [modalShow, setModalShow] = useState(false);
-    const { data } = props;
 
     return (
         <section className="tf-hot-pick">
@@ -29,7 +23,7 @@ function HotPick(props) {
                         {
                             <div className="row tf-filter-container wow fadeInUp">
                                 {
-                                    data.map(idx => (
+                                    data?.map(idx => (
                                         <div key={idx.id} className="col-xl-3 col-lg-4 col-md-6 col-sm-6 tf-loadmore 3d cyber">
                                             <div className="sc-product style2">
                                                 <div className="top">
@@ -81,12 +75,6 @@ function HotPick(props) {
 
                     </div>
 
-                </div>
-
-                <div className="col-md-12">
-                    <div className="btn-loadmore mt17 mb17 wow fadeInUp">
-                        <Link to="/explore" className="tf-button loadmore style-4">Load more</Link>
-                    </div>
                 </div>
             </div>
 

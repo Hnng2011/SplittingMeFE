@@ -2,50 +2,15 @@ import { useState } from 'react';
 import { useAccount } from 'wagmi';
 import { useContractWrite, usePrepareContractWrite, useContractRead, useWaitForTransaction } from 'wagmi'
 import AddSlot from '../assets/deployment/FactoryToken.json'
-import checkNFT from '../assets/deployment/NFTSplittingME.json'
+import NFTSpl from '../assets/deployment/NFTSplittingME.json'
 import './mint.css'
+import { useDebounce } from 'use-debounce';
 
 function MintTokenList(data) {
     const { address } = useAccount()
 
-    const { data: nftused } = useContractRead({
-        address: AddSlot.address,
-        abi: [{
-            "inputs": [
-                {
-                    "internalType": "uint256",
-                    "name": "",
-                    "type": "uint256"
-                }
-            ],
-            "name": "campaignsByID",
-            "outputs": [
-                {
-                    "internalType": "address",
-                    "name": "owner",
-                    "type": "address"
-                },
-                {
-                    "internalType": "address",
-                    "name": "campaignAddress",
-                    "type": "address"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "NFTID",
-                    "type": "uint256"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-        }],
-        functionName: 'campaignsByID',
-        args: [data],
-        enabled: Boolean[data]
-    })
-
     const { data: name } = useContractRead({
-        address: nftused?.[1],
+        address: data?.data,
         abi: [{
             "inputs": [],
             "name": "name",
@@ -60,11 +25,11 @@ function MintTokenList(data) {
             "type": "function"
         },],
         functionName: 'name',
-        enabled: Boolean[nftused?.[1] && String(nftused?.[2]) !== '0']
+        enabled: Boolean(data?.data)
     })
 
     const { data: symbol } = useContractRead({
-        address: nftused?.[1],
+        address: data?.data,
         abi: [{
             "inputs": [],
             "name": "symbol",
@@ -79,11 +44,11 @@ function MintTokenList(data) {
             "type": "function"
         }],
         functionName: 'symbol',
-        enabled: Boolean[nftused?.[1] && String(nftused?.[2]) !== '0']
+        enabled: Boolean(data?.data)
     })
 
     const { data: quantity } = useContractRead({
-        address: nftused?.[1],
+        address: data?.data,
         abi: [{
             "inputs": [
                 {
@@ -105,19 +70,124 @@ function MintTokenList(data) {
         }],
         functionName: 'balanceOf',
         args: [address],
-        enabled: Boolean[nftused?.[1] && String(nftused?.[2]) !== '0']
+        enabled: Boolean(data?.data)
     })
 
-    return { nftused, name, symbol, quantity }
+    return { name, symbol, quantity }
 }
 
-const TokenMint = ({ data }) => {
-    const { address } = useAccount()
-    const [nameToken, setNameToken] = useState("")
-    const [symbolToken, setSymbolToken] = useState("")
+function Minttoken(data) {
     const [quantityToken, setQuantityToken] = useState('')
+    const { name, symbol, quantity } = MintTokenList(data)
+    const { address } = useAccount()
+    const [finalquantityToken] = useDebounce(quantityToken, 800)
 
-    const { nftused, name, symbol, quantity } = MintTokenList(data)
+    const { config: minttoken } = usePrepareContractWrite({
+        address: data.data,
+        abi: [{
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "account",
+                    "type": "address"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "amount",
+                    "type": "uint256"
+                }
+            ],
+            "name": "mint",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },],
+        functionName: 'mint',
+        args: [address, finalquantityToken],
+        enabled: Boolean(finalquantityToken)
+    })
+
+    const { write: mint, isLoading, data: datamint } = useContractWrite(minttoken)
+    const { isLoading: mintloading } = useWaitForTransaction({
+        hash: datamint?.hash,
+    })
+
+    const handleinput = (e) => {
+        if (e.target.name === 'quantity') {
+            const regex = /^[0-9]+$/;
+            if (regex.test(e.target.value)) {
+                setQuantityToken(e.target.value)
+            }
+
+            if (e.target.value === '') {
+                setQuantityToken(e.target.value)
+            }
+        }
+    }
+
+    const showtokencontract = () => {
+        navigator.clipboard.writeText(String(data.data))
+    }
+
+    return (
+        <div className='list_mint_token'>
+            <div className='contract' onClick={() => showtokencontract()}>
+                <div className='contract-header'>Copy Contract</div>
+                <img src="https://cdn-icons-png.flaticon.com/512/566/566295.png" alt="splittingme" />
+            </div>
+            <div className='name_mint_token'>
+                <div>Token Name:</div>
+                <div>{name}</div>
+            </div>
+            <div className='quantity_mint_token_nft'>
+                <div> Token Symbol: </div>
+                <div>{symbol}</div>
+            </div>
+            <div className='quantity_mint_token_nft'>
+                <div> Token Quantity: </div>
+                <div>{String(quantity)}</div>
+            </div>
+            <div className='quantity_mint_token'>
+                <div> Tokens To Mint:</div>
+                <input name='quantity' id="mintinput" type="text" value={quantityToken} placeholder='VD:1000' onChange={e => handleinput(e)} />
+            </div>
+            <button disabled={quantityToken === ''} className='mint_btn' onClick={() => mint?.()}>{(isLoading || mintloading) ? 'Minting..' : 'Mint'}</button>
+        </div>
+    )
+}
+
+const NFTcreate = ({ data }) => {
+    const [nameToken, setNameToken] = useState('')
+    const [symbolToken, setSymbolToken] = useState('')
+    const [finalnameToken] = useDebounce(nameToken, 800)
+    const [finalsymbolToken] = useDebounce(symbolToken, 800)
+
+
+    const { data: approved } = useContractRead({
+        address: NFTSpl.address,
+        abi: [{
+            "inputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "tokenId",
+                    "type": "uint256"
+                }
+            ],
+            "name": "getApproved",
+            "outputs": [
+                {
+                    "internalType": "address",
+                    "name": "",
+                    "type": "address"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        }],
+        functionName: 'getApproved',
+        args: [data],
+        enabled: Boolean(data),
+    })
 
     const { config: createCampaign } = usePrepareContractWrite({
         address: AddSlot.address,
@@ -145,47 +215,37 @@ const TokenMint = ({ data }) => {
             "type": "function"
         }],
         functionName: 'createNewCampaign',
-        args: [nameToken, symbolToken, data],
+        args: [finalnameToken, finalsymbolToken, data],
+        enabled: Boolean(finalnameToken && finalsymbolToken)
     })
 
-    const { config: minttoken } = usePrepareContractWrite({
-        address: nftused?.[1],
+    const { config: approvenft } = usePrepareContractWrite({
+        address: NFTSpl.address,
         abi: [{
             "inputs": [
                 {
                     "internalType": "address",
-                    "name": "account",
+                    "name": "to",
                     "type": "address"
                 },
                 {
                     "internalType": "uint256",
-                    "name": "amount",
+                    "name": "tokenId",
                     "type": "uint256"
                 }
             ],
-            "name": "mint",
+            "name": "approve",
             "outputs": [],
             "stateMutability": "nonpayable",
             "type": "function"
-        },],
-        functionName: 'mint',
-        args: [address, quantityToken],
+        }],
+        functionName: 'approve',
+        args: [AddSlot.address, data],
+        enabled: Boolean(data),
     })
 
-
     const handleinput = (e) => {
-        if (e.target.name === 'quantity') {
-            const regex = /^[0-9]+$/;
-            if (regex.test(e.target.value)) {
-                setQuantityToken(e.target.value)
-            }
-
-            if (e.target.value === '') {
-                setQuantityToken(e.target.value)
-            }
-        }
-
-        else if (e.target.name === 'tokenname') {
+        if (e.target.name === 'tokenname') {
             if ((e.target.value).length <= 15) {
                 setNameToken(e.target.value);
             }
@@ -198,70 +258,46 @@ const TokenMint = ({ data }) => {
         }
     }
 
-    const showtokencontract = () => {
-        navigator.clipboard.writeText(String(nftused?.[1]))
-    }
-
     const { write: create, isLoading, data: createcam } = useContractWrite(createCampaign)
-    const { write: mint, isLoading: isLoading2, data: minttok } = useContractWrite(minttoken)
 
-    const { isLoading: mintloading } = useWaitForTransaction({
-        hash: minttok?.hash,
-    })
+    const { write: approve, data: approvedd, isLoading: approveload } = useContractWrite(approvenft)
+
     const { isLoading: createloading } = useWaitForTransaction({
         hash: createcam?.hash,
     })
 
+    const { isLoading: approveloading } = useWaitForTransaction({
+        hash: approvedd?.hash,
+    })
+
+    const handlecreat = () => {
+        if (approved === '0x0000000000000000000000000000000000000000') {
+            approve?.()
+        }
+        else {
+            create?.()
+        }
+    }
+
     return (
         <>
-            {
+            <div className='list_mint_token'>
+                <img src="https://lp-cms-production.imgix.net/image_browser/Ho%20Chi%20Minh%20City%20skyline.jpg?auto=format&w=1440&h=810&fit=crop&q=75" alt="splittingme" />
 
-                (String(nftused?.[2])) !== data &&
-                <div className='list_mint_token'>
-                    <img src="https://lp-cms-production.imgix.net/image_browser/Ho%20Chi%20Minh%20City%20skyline.jpg?auto=format&w=1440&h=810&fit=crop&q=75" alt="splittingme" />
-
-                    <div className='name_mint_token'>
-                        <div>NFT id:</div>
-                        <div>{data}</div>
-                    </div>
-                    <div className='quantity_mint_token_nft'>
-                        <div> Token Name: </div>
-                        <input name='tokenname' id="mintinput" type="text" value={nameToken} placeholder={'VD:Binance'} onChange={e => handleinput(e)} />
-                    </div>
-                    <div className='quantity_mint_token'>
-                        <div> Token Symbol:</div>
-                        <input name='tokensymbol' id="mintinput" type="text" value={symbolToken} placeholder='VD:BNB' onChange={e => handleinput(e)} />
-                    </div>
-                    <button className='mint_btn' onClick={() => create?.()}>{(isLoading || createloading) ? 'Creating..' : 'Create'}</button>
+                <div className='name_mint_token'>
+                    <div>NFT id:</div>
+                    <div>{data}</div>
                 </div>
-            }
-
-            {
-                (String(nftused?.[2])) === data &&
-                <div className='list_mint_token'>
-                    <div className='contract' onClick={() => showtokencontract()}>
-                        <div className='contract-header'>Copy Contract</div>
-                        <img src="https://cdn-icons-png.flaticon.com/512/566/566295.png" alt="splittingme" />
-                    </div>
-                    <div className='name_mint_token'>
-                        <div>Token Name:</div>
-                        <div>{name}</div>
-                    </div>
-                    <div className='quantity_mint_token_nft'>
-                        <div> Token Symbol: </div>
-                        <div>{symbol}</div>
-                    </div>
-                    <div className='quantity_mint_token_nft'>
-                        <div> Token Quantity: </div>
-                        <div>{String(quantity)}</div>
-                    </div>
-                    <div className='quantity_mint_token'>
-                        <div> Tokens To Mint:</div>
-                        <input name='quantity' id="mintinput" type="text" value={quantityToken} placeholder='VD:1000' onChange={e => handleinput(e)} />
-                    </div>
-                    <button disabled={quantityToken === ''} className='mint_btn' onClick={() => mint?.()}>{(isLoading2 || mintloading) ? 'Minting..' : 'Mint'}</button>
+                <div className='quantity_mint_token_nft'>
+                    <div> Token Name: </div>
+                    <input name='tokenname' id="mintinput" type="text" value={nameToken} placeholder={'VD:Binance'} onChange={e => handleinput(e)} />
                 </div>
-            }
+                <div className='quantity_mint_token'>
+                    <div> Token Symbol:</div>
+                    <input name='tokensymbol' id="mintinput" type="text" value={symbolToken} placeholder='VD:BNB' onChange={e => handleinput(e)} />
+                </div>
+                <button className='mint_btn' onClick={() => handlecreat()}>{(isLoading || createloading) ? 'Creating..' : (approveloading || approveload) ? 'Approving' : 'Create'}</button>
+            </div>
         </>
     )
 
@@ -269,8 +305,8 @@ const TokenMint = ({ data }) => {
 
 const Mint = () => {
     const [mode, setMode] = useState('NFT')
-    const [addAdress, setAddAdress] = useState("")
-    const [findAdress, setFindAdress] = useState("")
+    const [addAdress, setAddAdress] = useState(null)
+    const [findAdress, setFindAdress] = useState(null)
     const { address } = useAccount()
 
     const { config: addSlot } = usePrepareContractWrite({
@@ -290,6 +326,7 @@ const Mint = () => {
         }],
         functionName: 'addSlotMintNFT',
         args: [addAdress],
+        enabled: Boolean(addAdress)
     })
 
     const { config: mintNFT } = usePrepareContractWrite({
@@ -364,7 +401,7 @@ const Mint = () => {
     })
 
     const { data: NFTList } = useContractRead({
-        address: checkNFT.address,
+        address: NFTSpl.address,
         abi: [{
             "inputs": [
                 {
@@ -385,6 +422,32 @@ const Mint = () => {
             "type": "function"
         }],
         functionName: 'getAllNFT',
+        args: [address],
+        enabled: Boolean[address]
+    })
+
+    const { data: TokenList } = useContractRead({
+        address: AddSlot.address,
+        abi: [{
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "_owner",
+                    "type": "address"
+                }
+            ],
+            "name": "getAllCampaignsByOwner",
+            "outputs": [
+                {
+                    "internalType": "address[]",
+                    "name": "",
+                    "type": "address[]"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        }],
+        functionName: 'getAllCampaignsByOwner',
         args: [address],
         enabled: Boolean[address]
     })
@@ -425,7 +488,12 @@ const Mint = () => {
                     <div className='mint_token header'>Token Mint List</div>
                     {
                         NFTList?.map((data) => (
-                            String(data) !== '0' && <TokenMint key={String(data)} data={data.toString()} />
+                            String(data) !== '0' && <NFTcreate key={String(data)} data={String(data)} />
+                        ))
+                    }
+                    {
+                        TokenList?.map((data) => (
+                            String(data) !== '0' && <Minttoken key={String(data)} data={data} />
                         ))
                     }
                 </div>
