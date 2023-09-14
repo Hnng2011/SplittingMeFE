@@ -19,10 +19,19 @@ import value1 from '../../assets/images/icon/value1.png'
 import value2 from '../../assets/images/icon/value2.png'
 import value3 from '../../assets/images/icon/value3.png'
 import value4 from '../../assets/images/icon/value4.png'
+import { formatEther, parseEther } from 'viem'
+
+const Mlm = () => {
+    const { address, isConnected } = useAccount()
+    const [packages, setPackages] = useState('')
+    const [buying, setBuying] = useState(false)
+
+    const copy = () => {
+        navigator.clipboard.writeText(window.location.href.split('?')[0] + `?referal=${address}`)
+    }
 
 
-function Slot() {
-    const slot = useContractRead({
+    const { data: slot } = useContractRead({
         address: TokenSaleAdd.address,
         abi: [{
             "inputs": [],
@@ -38,13 +47,10 @@ function Slot() {
             "type": "function"
         },],
         functionName: 'checkSlotBasic',
+        watch: true,
     });
 
-    return slot
-}
-
-function Price(packages) {
-    const price = useContractRead({
+    const { data: price } = useContractRead({
         address: TokenSaleAdd.address,
         abi: [{
             "inputs": [
@@ -67,14 +73,11 @@ function Price(packages) {
         }],
         functionName: 'getPrice',
         args: [packages],
-        enabled: (Boolean(packages) || packages === 0)
-    });
+        enabled: (buying),
+        select: (data) => formatEther(data)
+    })
 
-    return price
-}
-
-function Allowance(address, tokensaleadd) {
-    const allowance = useContractRead({
+    const { data: allowance } = useContractRead({
         address: USDTAdd.address,
         abi: [{
             "inputs": [
@@ -101,21 +104,11 @@ function Allowance(address, tokensaleadd) {
             "type": "function"
         }],
         functionName: "allowance",
-        args: [address, tokensaleadd],
+        args: [address, TokenSaleAdd.address],
         enabled: Boolean(address),
+        watch: true,
+        select: (data) => formatEther(data)
     })
-    return allowance
-}
-
-const Mlm = () => {
-    const { address, isConnected } = useAccount()
-    const [packages, setPackages] = useState('')
-    const [buying, setBuying] = useState(false)
-
-
-    let price = Price(packages)
-    let slot = Slot()
-    let allowance = Allowance(address, TokenSaleAdd.address)
 
     const { config: buyPackage } = usePrepareContractWrite({
         address: TokenSaleAdd.address,
@@ -138,9 +131,8 @@ const Mlm = () => {
             "type": "function"
         }],
         functionName: "buyPackage",
-        args: [packages, price?.data],
-        isDataEqual: (prev, next) => (prev === next ? prev : next),
-        enabled: Boolean(price?.data),
+        args: [packages, parseEther((price) || '0')],
+        enabled: Boolean(buying),
     })
 
     const { config: usdtApprove } = usePrepareContractWrite({
@@ -170,45 +162,51 @@ const Mlm = () => {
             "type": "function"
         }],
         functionName: "approve",
-        args: [TokenSaleAdd.address, price?.data],
-        isDataEqual: (prev, next) => (prev === next ? prev : next),
-        enabled: Boolean(price?.data),
+        args: [TokenSaleAdd.address, parseEther((price) || '0')],
+        enabled: Boolean(buying),
     })
 
-    const { write: buypackage, isLoading } = useContractWrite(buyPackage)
-    const { data: usdtapprove, write: approve, isLoading: Approving } = useContractWrite(usdtApprove)
+    const { data: buypack, write: buypackage, isLoading, isError } = useContractWrite(buyPackage)
+    const { data: usdtapprove, write: approve, isLoading: Approving, isError: isError2 } = useContractWrite(usdtApprove)
+    const { isLoading: buyloading, isSuccess: buysucces } = useWaitForTransaction({
+        hash: buypack?.hash,
+    })
     const { isLoading: approveloading, isSuccess: approvesucces } = useWaitForTransaction({
         hash: usdtapprove?.hash,
     })
 
     const buy = (id) => {
         setPackages(id);
-        setBuying((buying) => !buying);
-    }
-
-    const copy = () => {
-        navigator.clipboard.writeText(window.location.href.split('?')[0] + `?referal=${address}`)
+        setBuying(true);
     }
 
     useEffect(() => {
-        if (String(allowance?.data) < String(price?.data)) {
+        if ((Number(allowance) < Number(price)) && buying) {
             approve?.()
         }
         else {
-            buypackage?.()
+            if (buying) {
+                buypackage?.()
+            }
+
         }
 
     }, [buying])
 
     useEffect(() => {
         if (approvesucces) {
-            window.location.reload();
+            buypackage?.()
         }
     }, [approvesucces])
 
+    useEffect(() => {
+        if (buysucces || isError || isError2) {
+            setBuying(false)
+        }
+    }, [buysucces, isError, isError2])
 
     const statusstyle = {
-        width: `calc(${Number(slot?.data) * 50 / 10000}% + 1%)` /*100%*/
+        width: `calc(${Number(slot) * 50 / 10000}% + 1%)` /*100%*/
     }
 
     return (
@@ -226,7 +224,7 @@ const Mlm = () => {
                             <div><img src={value2} />Cap : <span> $99.9M</span></div>
                         </div>
                         <div className='mlm-buy'>
-                            <button disabled={!isConnected || approveloading || Approving || isLoading} onClick={() => buy(1)}> {isLoading ? 'Buying...' : (approveloading || Approving) ? 'Approving' : 'Buy Now'}</button>
+                            <button disabled={!isConnected || approveloading || Approving || isLoading} onClick={() => buy(1)}> {(isLoading || buyloading) ? 'Buying...' : (approveloading || Approving) ? 'Approving' : 'Buy Now'}</button>
                         </div>
                     </div>
                 </div>
@@ -245,7 +243,7 @@ const Mlm = () => {
                             <div><img src={value3} />Cap : <span> $99.8M</span></div>
                         </div>
                         <div className='mlm-buy'>
-                            <button disabled={!isConnected || approveloading || Approving || isLoading} onClick={() => buy(2)}> {isLoading ? 'Buying...' : (approveloading || Approving) ? 'Approving' : 'Buy Now'}</button>
+                            <button disabled={!isConnected || approveloading || Approving || isLoading} onClick={() => buy(2)}> {(isLoading || buyloading) ? 'Buying...' : (approveloading || Approving) ? 'Approving' : 'Buy Now'}</button>
                         </div>
                     </div>
                 </div>
@@ -264,7 +262,7 @@ const Mlm = () => {
                             <div><img src={value4} />Cap : <span> $99.5M</span></div>
                         </div>
                         <div className='mlm-buy'>
-                            <button disabled={!isConnected || approveloading || Approving || isLoading} onClick={() => buy(3)}> {isLoading ? 'Buying...' : (approveloading || Approving) ? 'Approving' : 'Buy Now'}</button>
+                            <button disabled={!isConnected || approveloading || Approving || isLoading} onClick={() => buy(3)}> {(isLoading || buyloading) ? 'Buying...' : (approveloading || Approving) ? 'Approving' : 'Buy Now'}</button>
                         </div>
                     </div>
                 </div>
@@ -279,7 +277,7 @@ const Mlm = () => {
                         <div className='mlm-head'>Basic</div>
                         <div className='mlm-price'>
                             100%
-                            <div id='statusbar'>10$ for 10000 User <div className='status' style={statusstyle}></div><div>{String(slot.data)} User Buy</div></div>
+                            <div id='statusbar'>10$ for 10000 User <div className='status' style={statusstyle}></div><div>{String(slot)} User Buy</div></div>
                         </div>
                         <div className='mlm-details'>
                             <div><img src={lv1} />Level : <span>1</span></div>
@@ -288,7 +286,7 @@ const Mlm = () => {
                             <div><img src={value1} />Cap : <span> $100M</span></div>
                         </div>
                         <div className='mlm-buy'>
-                            <button disabled={!isConnected || approveloading || Approving || isLoading} onClick={() => buy(0)}> {isLoading ? 'Buying...' : (approveloading || Approving) ? 'Approving...' : 'Buy Now'}</button>
+                            <button disabled={!isConnected || approveloading || Approving || isLoading} onClick={() => buy(0)}> {(isLoading || buyloading) ? 'Buying...' : (approveloading || Approving) ? 'Approving...' : 'Buy Now'}</button>
                         </div>
                     </div>
                 </div>

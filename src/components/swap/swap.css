@@ -297,6 +297,24 @@
     }
 }
 
+.swapbtn {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  border-radius: 50%;
+  background-color: white;
+  color: black;
+  height: 5%;
+  width: 5%;
+  cursor: pointer;
+  left: 50%;
+  top: 40%;
+  transform: translate(-50% , -25%);
+  font-size: 18px;
+}
+
 @media (max-width: 768px) 
 {
     .swap {

@@ -12,6 +12,7 @@
     "@web3-react/walletconnect-connector": "^6.2.13",
     "@web3-react/walletlink-connector": "^6.2.14",
     "aos": "^2.3.4",
+    "big-integer": "^1.6.51",
     "bn.js": "^5.2.1",
     "chart.js": "^3.9.1",
     "ethers": "^6.7.1",

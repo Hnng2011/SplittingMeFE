@@ -1930,6 +1930,11 @@ header.absolute {
 
 button:disabled {
     opacity: 0.4;
+    cursor: not-allowed !important;
+}
+
+button:hover:disabled {
+  opacity: 0.4 !important;
 }
 
 .tf-hot-pick {

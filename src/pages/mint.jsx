@@ -5,6 +5,8 @@ import AddSlot from '../assets/deployment/FactoryToken.json'
 import NFTSpl from '../assets/deployment/NFTSplittingME.json'
 import './mint.css'
 import { useDebounce } from 'use-debounce';
+import { formatEther } from 'viem'
+import { parseEther } from 'viem'
 
 function MintTokenList(data) {
     const { address } = useAccount()
@@ -70,7 +72,8 @@ function MintTokenList(data) {
         }],
         functionName: 'balanceOf',
         args: [address],
-        enabled: Boolean(data?.data)
+        enabled: Boolean(data?.data),
+        select: (data) => formatEther(data)
     })
 
     return { name, symbol, quantity }
@@ -103,7 +106,7 @@ function Minttoken(data) {
             "type": "function"
         },],
         functionName: 'mint',
-        args: [address, finalquantityToken],
+        args: [address, parseEther(finalquantityToken)],
         enabled: Boolean(finalquantityToken)
     })
 
@@ -124,6 +127,7 @@ function Minttoken(data) {
             }
         }
     }
+
 
     const showtokencontract = () => {
         navigator.clipboard.writeText(String(data.data))
@@ -147,6 +151,7 @@ function Minttoken(data) {
                 <div> Token Quantity: </div>
                 <div>{String(quantity)}</div>
             </div>
+
             <div className='quantity_mint_token'>
                 <div> Tokens To Mint:</div>
                 <input name='quantity' id="mintinput" type="text" value={quantityToken} placeholder='VD:1000' onChange={e => handleinput(e)} />
@@ -186,6 +191,7 @@ const NFTcreate = ({ data }) => {
         }],
         functionName: 'getApproved',
         args: [data],
+        watch: true,
         enabled: Boolean(data),
     })
 

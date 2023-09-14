@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import PageTitle from '../components/pagetitle/PageTitle';
 import PoolList from '../components/pool/pool';
 import { useState } from 'react';
@@ -7,11 +7,7 @@ import AddSlot from '../assets/deployment/FactoryToken.json'
 import FactoryPool from '../assets/deployment/FactoryPool.json'
 import USDT from '../assets/deployment/USDT.json'
 import { useDebounce } from 'use-debounce';
-
-const datas = [
-    { id: 0, name: 'vNFT', APR: 5.56, Total: 118, Period: 30, url: 'https://w7.pngwing.com/pngs/997/942/png-transparent-bnb-crypto-cryptocurrency-cryptocurrencies-cash-money-bank-payment-icon.png', earn: 0 },
-    { id: 0, name: 'vNFT', APR: 5.56, Total: 118, Period: 30, url: 'https://w7.pngwing.com/pngs/997/942/png-transparent-bnb-crypto-cryptocurrency-cryptocurrencies-cash-money-bank-payment-icon.png', earn: 0 },
-    { id: 1, name: 'vNFT', APR: 5.56, Total: 118, Period: 30, url: 'https://w7.pngwing.com/pngs/997/942/png-transparent-bnb-crypto-cryptocurrency-cryptocurrencies-cash-money-bank-payment-icon.png', earn: 0 }]
+import { formatEther, parseEther } from 'viem';
 
 
 function MintTokenList(data) {
@@ -59,6 +55,7 @@ function MintTokenList(data) {
         }],
         functionName: 'balanceOf',
         args: [address],
+        select: (data) => formatEther(data),
         enabled: Boolean(data)
     })
 
@@ -67,6 +64,7 @@ function MintTokenList(data) {
 
 function Minttoken({ data }) {
     const { symbol, quantity } = MintTokenList(data)
+
     return (
         <>
             <option value={data}>
@@ -82,9 +80,8 @@ const Pool = () => {
     const [ratio, setRatio] = useState('')
     const [token, setToken] = useState('')
     const { address } = useAccount()
-    const [valuefee] = useDebounce(fee, 800);
-    const [valueratio] = useDebounce(ratio, 800);
-
+    const [valuefee] = useDebounce((fee * 10000), 800);
+    const [valueratio] = useDebounce((ratio * 10000), 800);
 
     const { data: TokenList } = useContractRead({
         address: AddSlot.address,
@@ -110,6 +107,24 @@ const Pool = () => {
         functionName: 'getAllCampaignsByOwner',
         args: [address],
         enabled: Boolean[address]
+    })
+
+    const { data: Poollist } = useContractRead({
+        address: FactoryPool.address,
+        abi: [{
+            "inputs": [],
+            "name": "getCampaignsAddresses",
+            "outputs": [
+                {
+                    "internalType": "address[]",
+                    "name": "",
+                    "type": "address[]"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        }],
+        functionName: 'getCampaignsAddresses',
     })
 
     const { config: createNewCampaign } = usePrepareContractWrite({
@@ -143,15 +158,22 @@ const Pool = () => {
             "type": "function"
         }],
         functionName: 'createNewCampaign',
-        args: [USDT.address, token, valuefee, valueratio],
-        enabled: Boolean(token && valuefee && valueratio)
+        args: [USDT.address, token, parseEther((String(valuefee) || '0')), parseEther((String(valueratio) || '0'))],
+        enabled: Boolean(token) && Boolean(valuefee) && Boolean(valueratio)
     })
 
     const { write: createnewcampaign, isLoading: loadingcreatenewcampaign } = useContractWrite(createNewCampaign)
 
     const handlecreate = () => {
+        console.log(token)
         createnewcampaign?.()
     }
+
+    useEffect(() => {
+        if (address) {
+            setToken(TokenList?.[0])
+        }
+    }, [address])
 
     return (
         <div className='page-explore'>
@@ -167,7 +189,7 @@ const Pool = () => {
                             <select value={token} onChange={(e) => setToken(e.target.value)}>
                                 {
                                     TokenList?.map((data) => (
-                                        String(data) !== '0' && <Minttoken key={String(data)} data={data} setToken={setToken} />
+                                        String(data) !== '0' && <Minttoken key={String(data)} data={data} />
                                     ))
                                 }
                             </select>
@@ -175,12 +197,12 @@ const Pool = () => {
                         <div className='inputpoolcreatelist'>
                             <label>Fee</label>
                             <br />
-                            <input value={fee} placeholder={0.3} onChange={(e) => setFee(e.target.value)}></input>
+                            <input value={fee} placeholder={0.1} onChange={(e) => setFee(e.target.value)}></input>
                         </div>
                         <div className='inputpoolcreatelist'>
                             <label>Ratio</label>
                             <br />
-                            <input value={ratio} placeholder={3} onChange={(e) => setRatio(e.target.value)}></input>
+                            <input value={ratio} placeholder={1} onChange={(e) => setRatio(e.target.value)}></input>
                         </div>
                         <div className='buttonCreate' onClick={() => handlecreate()}>{loadingcreatenewcampaign ? 'Creating' : 'Create'}</div>
                     </div>
@@ -206,7 +228,7 @@ const Pool = () => {
                 </div>
 
                 <button onClick={() => setActive(!active)} className='createpool'><span>+</span> Create Pool</button>
-                <PoolList datas={datas} />
+                <PoolList datas={Poollist} address={address} />
             </section>
         </div>
     )

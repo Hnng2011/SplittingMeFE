@@ -47,13 +47,11 @@ function Dashboard() {
         args: [address],
         enabled: Boolean[address]
     })
-    const { nft, setNFT } = useState('')
 
     const [modalShow, setModalShow] = useState(false);
     const [mode, setMode] = useState('')
 
     const setSell = () => {
-        setNFT(nft)
         setModalShow(true)
         setMode('sell')
     }
@@ -150,7 +148,6 @@ function Dashboard() {
             <CardModal
                 show={modalShow}
                 mode={mode}
-                nft={nft}
                 onHide={() => { setModalShow(false); setMode('') }}
             />
         </div >
