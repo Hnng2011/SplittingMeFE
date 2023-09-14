@@ -83,7 +83,7 @@ function Minttoken(data) {
     const [quantityToken, setQuantityToken] = useState('')
     const { name, symbol, quantity } = MintTokenList(data)
     const { address } = useAccount()
-    const [finalquantityToken] = useDebounce(quantityToken, 800)
+    const [finalquantityToken] = useDebounce(quantityToken, 300)
 
     const { config: minttoken } = usePrepareContractWrite({
         address: data.data,
@@ -164,8 +164,8 @@ function Minttoken(data) {
 const NFTcreate = ({ data }) => {
     const [nameToken, setNameToken] = useState('')
     const [symbolToken, setSymbolToken] = useState('')
-    const [finalnameToken] = useDebounce(nameToken, 800)
-    const [finalsymbolToken] = useDebounce(symbolToken, 800)
+    const [finalnameToken] = useDebounce(nameToken, 300)
+    const [finalsymbolToken] = useDebounce(symbolToken, 300)
 
 
     const { data: approved } = useContractRead({
@@ -294,7 +294,7 @@ const NFTcreate = ({ data }) => {
                     <div>NFT id:</div>
                     <div>{data}</div>
                 </div>
-                <div className='quantity_mint_token_nft'>
+                <div className='quantity_mint_token'>
                     <div> Token Name: </div>
                     <input name='tokenname' id="mintinput" type="text" value={nameToken} placeholder={'VD:Binance'} onChange={e => handleinput(e)} />
                 </div>

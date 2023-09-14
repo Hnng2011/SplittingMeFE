@@ -27,9 +27,6 @@ header {
 
           @include mobile {
             margin-right: 40px;
-            .tf-button  {
-                display: none;
-            }
           }
           .tf-button,.user,.mode-switch {
               margin-right: 8px;

@@ -1893,7 +1893,9 @@ header.absolute {
   border-radius: 10px;
   height: 50%;
   font-size: 1em;
-  margin-left: 18vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   }
 
 #logo_header{
@@ -1939,4 +1941,24 @@ button:hover:disabled {
 
 .tf-hot-pick {
   min-height: calc(100vh - 78px)
+}
+
+.m-cus {
+  margin-left: 10%;
+}
+
+.button-cus {
+  background-color: yellow;
+  color: black;
+  padding: 10px;
+  border-radius: 15px;
+  overflow: hidden;
+  width: 30%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.button-popup {
+  width: 100%;
 }

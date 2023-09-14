@@ -1,13 +1,12 @@
-import React, { useEffect } from 'react'
 import PageTitle from '../components/pagetitle/PageTitle';
 import PoolList from '../components/pool/pool';
 import { useState } from 'react';
-import { useContractRead, useAccount, useContractWrite, usePrepareContractWrite } from 'wagmi';
+import { useContractRead, useAccount, useContractWrite, usePrepareContractWrite, useWaitForTransaction } from 'wagmi';
 import AddSlot from '../assets/deployment/FactoryToken.json'
 import FactoryPool from '../assets/deployment/FactoryPool.json'
 import USDT from '../assets/deployment/USDT.json'
 import { useDebounce } from 'use-debounce';
-import { formatEther, parseEther } from 'viem';
+import { formatEther } from 'viem';
 
 
 function MintTokenList(data) {
@@ -80,8 +79,8 @@ const Pool = () => {
     const [ratio, setRatio] = useState('')
     const [token, setToken] = useState('')
     const { address } = useAccount()
-    const [valuefee] = useDebounce((fee * 10000), 800);
-    const [valueratio] = useDebounce((ratio * 10000), 800);
+    const [valuefee] = useDebounce((Number(fee) * 10000), 300);
+    const [valueratio] = useDebounce((Number(ratio) * 10000), 300);
 
     const { data: TokenList } = useContractRead({
         address: AddSlot.address,
@@ -158,22 +157,21 @@ const Pool = () => {
             "type": "function"
         }],
         functionName: 'createNewCampaign',
-        args: [USDT.address, token, parseEther((String(valuefee) || '0')), parseEther((String(valueratio) || '0'))],
+        args: [USDT.address, token, ((String(valuefee) || '0')), ((String(valueratio) || '0'))],
         enabled: Boolean(token) && Boolean(valuefee) && Boolean(valueratio)
     })
 
-    const { write: createnewcampaign, isLoading: loadingcreatenewcampaign } = useContractWrite(createNewCampaign)
+    const { write: createnewcampaign, isLoading: loadingcreatenewcampaign, data: create } = useContractWrite(createNewCampaign)
+    const { isLoading, isSuccess } = useWaitForTransaction({
+        enabled: Boolean(create),
+        hash: create?.hash
+    })
 
     const handlecreate = () => {
         console.log(token)
         createnewcampaign?.()
     }
 
-    useEffect(() => {
-        if (address) {
-            setToken(TokenList?.[0])
-        }
-    }, [address])
 
     return (
         <div className='page-explore'>
@@ -204,7 +202,7 @@ const Pool = () => {
                             <br />
                             <input value={ratio} placeholder={1} onChange={(e) => setRatio(e.target.value)}></input>
                         </div>
-                        <div className='buttonCreate' onClick={() => handlecreate()}>{loadingcreatenewcampaign ? 'Creating' : 'Create'}</div>
+                        <div className='buttonCreate' onClick={() => handlecreate()}>{((loadingcreatenewcampaign || isLoading) && !isSuccess) ? 'Creating...' : 'Create'}</div>
                     </div>
                 </>
             }

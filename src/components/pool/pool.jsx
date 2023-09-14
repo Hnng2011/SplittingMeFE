@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import './style.css';
 import { useContractRead, usePrepareContractWrite, useContractWrite, useWaitForTransaction } from 'wagmi';
 import FactoryPool from '../../assets/deployment/FactoryPool.json'
 import USDT from '../../assets/deployment/USDT.json'
-import { useEffect } from 'react';
 import { parseEther, formatEther } from 'viem';
 
 function Poolitem({ data, address }) {
+    const [usdtfram, setUsdtfram] = useState(1000)
+    const [tokenadd, setTokenadd] = useState(null)
+
     const { data: Pooltoken } = useContractRead({
         address: FactoryPool.address,
         abi: [{
@@ -65,60 +67,6 @@ function Poolitem({ data, address }) {
         functionName: 'symbol',
         enabled: Boolean(Pooltoken)
     })
-    const { data: tokenbalance } = useContractRead({
-        address: Pooltoken?.[3],
-        abi: [{
-            "inputs": [
-                {
-                    "internalType": "address",
-                    "name": "",
-                    "type": "address"
-                }
-            ],
-            "name": "balanceOf",
-            "outputs": [
-                {
-                    "internalType": "uint256",
-                    "name": "",
-                    "type": "uint256"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-        }],
-        functionName: 'balanceOf',
-        args: [address],
-        select: (data) => formatEther(data),
-        watch: true,
-        enabled: Boolean(Pooltoken)
-    })
-    const { data: usdtbalance } = useContractRead({
-        address: USDT.address,
-        abi: [{
-            "inputs": [
-                {
-                    "internalType": "address",
-                    "name": "account",
-                    "type": "address"
-                }
-            ],
-            "name": "balanceOf",
-            "outputs": [
-                {
-                    "internalType": "uint256",
-                    "name": "",
-                    "type": "uint256"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-        }],
-        functionName: 'balanceOf',
-        args: [address],
-        select: (data) => formatEther(data),
-        watch: true,
-        enabled: Boolean(Pooltoken),
-    })
     const { data: usdttotal } = useContractRead({
         address: data,
         abi: [{
@@ -135,7 +83,7 @@ function Poolitem({ data, address }) {
             "type": "function"
         }],
         functionName: "poolusdtToken",
-        enabled: Boolean(data),
+        enabled: Boolean(Pooltoken),
         select: (data) => formatEther(data),
         watch: true,
     })
@@ -155,7 +103,7 @@ function Poolitem({ data, address }) {
             "type": "function"
         }],
         functionName: "poolToken1",
-        enabled: Boolean(data),
+        enabled: Boolean(Pooltoken),
         watch: true,
     })
     const { data: allowancetoken } = useContractRead({
@@ -277,10 +225,9 @@ function Poolitem({ data, address }) {
             "type": "function"
         }],
         functionName: "approve",
-        args: [data, parseEther(String((tokenbalance || '0')))],
-        enabled: Boolean(Number(allowancetoken) < 100),
+        args: [data, parseEther('10000')],
+        enabled: Boolean(tokenadd) && Boolean(Number(allowancetoken) < Number(tokenadd)),
     })
-
     const { config: usdtApprove } = usePrepareContractWrite({
         address: USDT.address,
         abi: [{
@@ -308,21 +255,19 @@ function Poolitem({ data, address }) {
             "type": "function"
         }],
         functionName: "approve",
-        args: [data, parseEther(String((usdtbalance || '0')))],
-        enabled: Boolean(Number(allowanceusdt) < 100),
+        args: [data, parseEther('10000')],
+        enabled: Boolean(usdtfram) && Boolean(Number(allowanceusdt) < Number(usdtfram)),
     })
-
     const { data: tokenapprove, write: approvetoken, isLoading: loadapprovetoken } = useContractWrite(TokenApprove)
     const { data: usdtapprove, write: approveusdt, isLoading: loadapproveusdt } = useContractWrite(usdtApprove)
-    const { isLoading: LoadingTokenApprove, isSuccess: SuccesTokenApprove } = useWaitForTransaction({
-        enabled: Boolean(address),
+    const { isLoading: LoadingTokenApprove } = useWaitForTransaction({
+        enabled: Boolean(tokenapprove),
         hash: tokenapprove?.hash,
     })
-    const { isLoading: LoadingUSDTApprove, isSuccess: SuccesUSDTApprove } = useWaitForTransaction({
-        enabled: Boolean(address),
+    const { isLoading: LoadingUSDTApprove } = useWaitForTransaction({
+        enabled: Boolean(usdtapprove),
         hash: usdtapprove?.hash,
     })
-
     const { config: AddPool } = usePrepareContractWrite({
         address: data,
         abi: [{
@@ -345,6 +290,7 @@ function Poolitem({ data, address }) {
         }],
         functionName: "addPoolToken",
         args: [Pooltoken?.[3], parseEther('100')],
+        enabled: Boolean(Pooltoken?.[0] === address) && Boolean(Number(allowancetoken) > Number(tokenadd)) && Boolean(tokenadd)
     })
     const { config: FramPool } = usePrepareContractWrite({
         address: data,
@@ -367,7 +313,8 @@ function Poolitem({ data, address }) {
             "type": "function"
         }],
         functionName: "FramPool",
-        args: [USDT.address, parseEther(('100'))],
+        args: [USDT.address, parseEther(String(usdtfram))],
+        enabled: Boolean(Number(allowanceusdt) > Number(usdtfram)) && Boolean(usdtfram)
     })
     const { config: WithDraw } = usePrepareContractWrite({
         address: data,
@@ -387,11 +334,11 @@ function Poolitem({ data, address }) {
     const { data: withdraw, write: draw, isLoading: loaddraw } = useContractWrite(WithDraw)
 
     const { isLoading: AddPoolLoading } = useWaitForTransaction({
-        enabled: Boolean(address),
+        enabled: Boolean(addpool),
         hash: addpool?.hash,
     })
     const { isLoading: FramPoolLoading } = useWaitForTransaction({
-        enabled: Boolean(address),
+        enabled: Boolean(frampool),
         hash: frampool?.hash,
     })
     const { isLoading: withdrawLoading } = useWaitForTransaction({
@@ -399,8 +346,9 @@ function Poolitem({ data, address }) {
         hash: withdraw?.hash,
     })
 
+
     const handle = (e) => {
-        if (e === 'add') {
+        if (String(e) === 'add') {
             if (Number(allowancetoken) < 100) {
                 approvetoken?.()
             }
@@ -408,27 +356,15 @@ function Poolitem({ data, address }) {
                 add?.()
             }
         }
-        else {
-            if (Number(allowanceusdt) < 100) {
+        else if (String(e) === 'fram') {
+            if (Number(allowanceusdt) < Number(usdtfram)) {
                 approveusdt?.()
             }
-
             else {
                 fram?.()
             }
         }
     }
-
-    useEffect(() => {
-        if (SuccesTokenApprove) {
-            add?.()
-        }
-
-        else if (SuccesUSDTApprove) {
-            fram?.()
-        }
-    }, [SuccesTokenApprove, SuccesUSDTApprove])
-
 
     return (
         <div className='grid-items'>
@@ -452,9 +388,9 @@ function Poolitem({ data, address }) {
 function Pool({ datas, address }) {
     return (
         <div className='grid-container'>
-            {datas?.map((data, idx) => (
-                <div key={idx}>
-                    <Poolitem data={data} idx={idx} address={address} />
+            {datas?.map((data) => (
+                <div key={data}>
+                    <Poolitem data={data} address={address} />
                 </div>
             ))}
         </div>

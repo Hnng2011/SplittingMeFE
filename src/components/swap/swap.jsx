@@ -9,6 +9,7 @@ import USDT from '../../assets/deployment/USDT.json'
 import TokenAbi from '../../assets/artifacts/contracts/CampaignTypesTokenERC20.sol/CampaignTypesTokenERC20.json'
 import { formatEther } from 'viem'
 import { useEffect } from 'react'
+import { useDebounce } from 'use-debounce'
 
 function Token({ data, address, setBalance, setSymbol, handleAddActiveClass, setPool, setToken }) {
     const setData = () => {
@@ -125,14 +126,15 @@ function TokenList({ address, handleAddActiveClass, setBalance, setSymbol, setPo
 
 const Swap = () => {
     const { address } = useAccount()
-    const [quantity, setQuantity] = useState('')
-    const [balance, setBalance] = useState('')
-    const [symbol, setSymbol] = useState('')
-    const [pool, setPool] = useState('')
-    const [token, setToken] = useState('')
-    const [token1, setToken1] = useState('')
-    const [token2, setToken2] = useState('')
+    const [quantity, setQuantity] = useState(null)
+    const [balance, setBalance] = useState(null)
+    const [symbol, setSymbol] = useState(null)
+    const [pool, setPool] = useState(null)
+    const [token, setToken] = useState(null)
+    const [token1, setToken1] = useState(null)
+    const [token2, setToken2] = useState(null)
     const [mode, setMode] = useState(true)
+    const [finalquant] = useDebounce(quantity, 500)
     const elementRef = useRef(null);
 
     const { data: usdtbalance } = useContractRead({
@@ -162,7 +164,6 @@ const Swap = () => {
         watch: true,
         enabled: Boolean(address),
     })
-
 
     const { data: allowanceusdt } = useContractRead({
         address: USDT.address,
@@ -313,42 +314,36 @@ const Swap = () => {
             "type": "function"
         }],
         functionName: "swap",
-        args: [token1, token2, parseEther((String(quantity) || '0'))],
+        args: [token1, token2, parseEther((finalquant ? String(finalquant) : '0'))],
         enabled: Boolean(address)
     })
     const { data: usdtapprove, write: approveusdt, isLoading: loadapproveusdt } = useContractWrite(usdtApprove)
     const { data: tokenapprove, write: approvetoken, isLoading: loadapprovetoken } = useContractWrite(TokenApprove)
     const { data: swappp, write: Swapp, isLoading: swapload } = useContractWrite(swapp)
-    const { isSuccess: approvesuccess, isLoading: approving } = useWaitForTransaction({
+    const { isLoading: approving, isSuccess: approvesuccess } = useWaitForTransaction({
         data: usdtapprove?.hash
     })
-    const { isLoading: swapping } = useWaitForTransaction({
+    const { isLoading: approvingtoken, isSuccess: approvetokensuccess } = useWaitForTransaction({
+        data: tokenapprove?.hash
+    })
+    const { isLoading: swapping, isSuccess: swapsuccess } = useWaitForTransaction({
         data: swappp?.hash
     })
 
     const handleinput = (e) => {
-        const regex = /^[0-9]+$/;
+
+        const regex = /^[0-9]*\.?[0-9]*$/;
         if (regex.test(e.target.value)) {
-            setQuantity(e.target.value)
+            setQuantity(e.target.value);
         }
 
         if (e.target.value === '') {
-            setQuantity(e.target.value)
+            setQuantity(e.target.value);
         }
 
-        if (mode) {
-            if (e.target.value > Number(balance)) {
-                setQuantity(balance)
-            }
+        if (parseFloat(e.target.value) > parseFloat(balance)) {
+            setQuantity(balance);
         }
-
-        else if (!mode) {
-            if (e.target.value > Number(usdtbalance)) {
-                setQuantity(usdtbalance)
-            }
-        }
-
-
     }
 
     const handleAddActiveClass = () => {
@@ -357,7 +352,7 @@ const Swap = () => {
 
     const swap = () => {
         if (mode) {
-            if (Number(allowancetoken) < Number(quantity)) {
+            if (Number(allowancetoken) < Number(finalquant)) {
                 approvetoken?.()
             }
             else {
@@ -366,7 +361,7 @@ const Swap = () => {
         }
 
         else {
-            if (Number(allowanceusdt) < Number(quantity)) {
+            if (Number(allowanceusdt) < Number(finalquant)) {
                 approveusdt?.()
             }
             else {
@@ -439,7 +434,7 @@ const Swap = () => {
 
                         <h3>Balance: {(usdtbalance ?? '0')} USDT</h3>
                     </div>
-                    <button disabled={!address || !quantity} onClick={() => swap()}>{(swapping || swapload || approving || loadapproveusdt) ? 'Swapping' : 'Swap'}</button>
+                    <button disabled={!address || !quantity || (swapping && !swapsuccess) || (approving && !approvesuccess) || swapload || loadapproveusdt || loadapprovetoken || (approvingtoken && !approvetokensuccess)} onClick={() => swap()}>{((swapping && !swapsuccess) || (approving && !approvesuccess) || swapload || loadapproveusdt || loadapprovetoken || (approvingtoken && !approvetokensuccess)) ? 'Swapping' : 'Swap'}</button>
                 </div>
             }
 
@@ -479,7 +474,7 @@ const Swap = () => {
                         </div>
                         <h3>Balance: {(balance ?? 0)} {symbol}</h3>
                     </div>
-                    <button disabled={!address || !quantity} onClick={() => swap()}>{(swapping || approving || swapload || loadapproveusdt) ? 'Swapping' : 'Swap'}</button>
+                    <button disabled={!address || !quantity || (swapping && !swapsuccess) || (approving && !approvesuccess) || swapload || loadapproveusdt || loadapprovetoken || (approvingtoken && !approvetokensuccess)} onClick={() => swap()}>{((swapping && !swapsuccess) || (approving && approvesuccess) || swapload || loadapproveusdt || loadapprovetoken || (approvingtoken && !approvetokensuccess)) ? 'Swapping' : 'Swap'}</button>
                 </div>
             }
 

@@ -1855,7 +1855,7 @@
   }
 }
 .dashboard-content.inventory .inner-content .table-ranking {
-  width: 100%;
+  width: 50%;
 }
 .dashboard-content.inventory .inner-content .table-ranking.top {
   margin-bottom: 16px;
@@ -1864,16 +1864,21 @@
   width: 16%;
 }
 .dashboard-content.inventory .inner-content .table-ranking .col-rankingg:nth-child(2) {
-  width: 16%;
+  width: 20%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5%;
+  margin-left: 35%;
 }
 .dashboard-content.inventory .inner-content .table-ranking .col-rankingg:nth-child(3) {
-  width: 19%;
+  width: fit-content;
 }
 .dashboard-content.inventory .inner-content .table-ranking .col-rankingg:nth-child(4) {
-  width: 16.4%;
+  width: fit-content;
 }
 .dashboard-content.inventory .inner-content .table-ranking .col-rankingg:nth-child(5) {
-  width: 14%;
+  width: 10%;
 }
 .dashboard-content.inventory .inner-content .table-ranking .col-rankingg:nth-child(6) {
   width: 15%;
@@ -1906,30 +1911,29 @@
   margin-bottom: 8px;
 }
 
-
 .dashboard-content.inventory .inner-content .table-ranking .content-ranking .col-rankingg {
   font-family: "DM Sans";
   font-weight: 700;
   font-size: 12px;
   color: var(--primary-color5);
 }
-.dashboard-content.inventory .inner-content .table-ranking .content-ranking .col-rankingg:nth-child(1) {
+.dashboard-content.inventory .inner-content .table-ranking .content-ranking .col-rankingg:nth-child {
   width: 15%;
 }
 .dashboard-content.inventory .inner-content .table-ranking .content-ranking .col-rankingg:nth-child(2) {
-  width: 16.6%;
+  width: 10%;
 }
 .dashboard-content.inventory .inner-content .table-ranking .content-ranking .col-rankingg:nth-child(3) {
-  width: 19.5%;
+  width: 10%;
 }
 .dashboard-content.inventory .inner-content .table-ranking .content-ranking .col-rankingg:nth-child(4) {
-  width: 17.2%;
+  width: 10%;
 }
 .dashboard-content.inventory .inner-content .table-ranking .content-ranking .col-rankingg:nth-child(5) {
-  width: 14%;
+  width: 10%;
 }
 .dashboard-content.inventory .inner-content .table-ranking .content-ranking .col-rankingg:nth-child(6) {
-  width: 15%;
+  width: 10%;
 }
 .dashboard-content.inventory .inner-content .table-ranking .content-ranking .col-rankingg.coin {
   font-weight: 400;
@@ -2153,6 +2157,28 @@
   padding: 11px 10px 10px 54px;
   margin-bottom: 11px;
 }
+
+.dashboard-content .inner-content.favorite {
+  position: relative;
+}
+
+.dashboard-content .inner-content.favorite .bg-fav:nth-child(1){
+  position: absolute;
+  height: 20vw;
+  right: 25%;
+  border-radius: 10px;
+  aspect-ratio: 13 / 16;
+}
+
+.dashboard-content .inner-content.favorite .bg-fav:nth-child(2){
+  position: absolute;
+  height: 20vw;
+  right: 0%;
+  border-radius: 10px;
+  aspect-ratio: 13 / 16;
+}
+
+
 .dashboard-content .inner-content.favorite .table-ranking .col-rankingg:nth-child(1) {
   width: 35.7%;
 }

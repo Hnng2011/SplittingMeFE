@@ -48,12 +48,15 @@ function Dashboard() {
         enabled: Boolean[address]
     })
 
+
     const [modalShow, setModalShow] = useState(false);
     const [mode, setMode] = useState('')
+    const [id, setId] = useState('')
 
-    const setSell = () => {
+    const setSell = (id) => {
         setModalShow(true)
         setMode('sell')
+        setId(id)
     }
 
     return (
@@ -98,13 +101,14 @@ function Dashboard() {
 
                                 <div className="dashboard-content inventory content-tab">
                                     <TabPanel><div className="inner-content inventory favorite">
+                                        <img className='bg-fav' src='https://i.pinimg.com/originals/bd/46/a3/bd46a353505a4a7cafc4989578be9ce7.gif' alt='dien' />
+                                        <img className='bg-fav' src='https://i.pinimg.com/originals/4d/17/49/4d1749d39bae5c936f1e3a39a639fef1.gif' alt='dien' />
                                         <div className="table-ranking top">
                                             <div className="title-ranking">
-                                                <div className="col-rankingg"><Link to="#">Name</Link></div>
-
+                                                <div className="col-rankingg"><Link to="#">ID</Link></div>
                                             </div>
                                         </div>
-                                        <div className="table-ranking ">
+                                        <div className="table-ranking">
                                             {
                                                 data?.map((id) => {
                                                     if (String(id) !== '0') {
@@ -120,15 +124,9 @@ function Dashboard() {
                                                                     </div>
                                                                 </div>
 
-
                                                                 <div className="col-rankingg">
-                                                                    {data?.quantity}
+                                                                    <button onClick={() => setSell(String(id))} className='sell-btn dp-none'>Sell</button>
                                                                 </div>
-
-                                                                <div className="col-rankingg">
-                                                                    <Link to="#"><button onClick={() => setSell()} className='sell-btn'>Sell</button></Link>
-                                                                </div>
-
                                                             </div>
                                                         )
                                                     }
@@ -148,6 +146,8 @@ function Dashboard() {
             <CardModal
                 show={modalShow}
                 mode={mode}
+                id={id}
+                setModalShow={setModalShow}
                 onHide={() => { setModalShow(false); setMode('') }}
             />
         </div >

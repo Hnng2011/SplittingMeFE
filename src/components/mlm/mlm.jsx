@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import './mlm.css'
 import { usePrepareContractWrite, useContractWrite, useAccount, useContractRead, useWaitForTransaction } from 'wagmi'
+import axios from 'axios';
 import TokenSaleAdd from '../../assets/deployment/TokenSale.json'
 import USDTAdd from '../../assets/deployment/USDT.json'
 import lv1 from '../../assets/images/icon/level1.png'
@@ -20,16 +21,17 @@ import value2 from '../../assets/images/icon/value2.png'
 import value3 from '../../assets/images/icon/value3.png'
 import value4 from '../../assets/images/icon/value4.png'
 import { formatEther, parseEther } from 'viem'
+import { useLocation } from 'react-router-dom'
 
 const Mlm = () => {
     const { address, isConnected } = useAccount()
-    const [packages, setPackages] = useState('')
-    const [buying, setBuying] = useState(false)
+    const [price, setPrice] = useState('')
+    const [priceList, setPriceList] = useState([])
+    const location = useLocation()
 
     const copy = () => {
-        navigator.clipboard.writeText(window.location.href.split('?')[0] + `?referal=${address}`)
+        navigator.clipboard.writeText(window.location.href.split('?')[0] + `?user_address=${address}`)
     }
-
 
     const { data: slot } = useContractRead({
         address: TokenSaleAdd.address,
@@ -49,8 +51,7 @@ const Mlm = () => {
         functionName: 'checkSlotBasic',
         watch: true,
     });
-
-    const { data: price } = useContractRead({
+    const { data: price1 } = useContractRead({
         address: TokenSaleAdd.address,
         abi: [{
             "inputs": [
@@ -72,11 +73,84 @@ const Mlm = () => {
             "type": "function"
         }],
         functionName: 'getPrice',
-        args: [packages],
-        enabled: (buying),
+        args: ['0'],
         select: (data) => formatEther(data)
     })
-
+    const { data: price2 } = useContractRead({
+        address: TokenSaleAdd.address,
+        abi: [{
+            "inputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "_packageName",
+                    "type": "uint256"
+                }
+            ],
+            "name": "getPrice",
+            "outputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        }],
+        functionName: 'getPrice',
+        args: ['1'],
+        select: (data) => formatEther(data)
+    })
+    const { data: price3 } = useContractRead({
+        address: TokenSaleAdd.address,
+        abi: [{
+            "inputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "_packageName",
+                    "type": "uint256"
+                }
+            ],
+            "name": "getPrice",
+            "outputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        }],
+        functionName: 'getPrice',
+        args: ['2'],
+        select: (data) => formatEther(data)
+    })
+    const { data: price4 } = useContractRead({
+        address: TokenSaleAdd.address,
+        abi: [{
+            "inputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "_packageName",
+                    "type": "uint256"
+                }
+            ],
+            "name": "getPrice",
+            "outputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        }],
+        functionName: 'getPrice',
+        args: ['3'],
+        select: (data) => formatEther(data)
+    })
     const { data: allowance } = useContractRead({
         address: USDTAdd.address,
         abi: [{
@@ -105,11 +179,10 @@ const Mlm = () => {
         }],
         functionName: "allowance",
         args: [address, TokenSaleAdd.address],
-        enabled: Boolean(address),
+        enabled: Boolean(address) && Number(price),
         watch: true,
         select: (data) => formatEther(data)
     })
-
     const { config: buyPackage } = usePrepareContractWrite({
         address: TokenSaleAdd.address,
         abi: [{
@@ -131,10 +204,9 @@ const Mlm = () => {
             "type": "function"
         }],
         functionName: "buyPackage",
-        args: [packages, parseEther((price) || '0')],
-        enabled: Boolean(buying),
+        args: [priceList?.indexOf(price), parseEther((price) || '0')],
+        enabled: Boolean(Number(allowance) >= Number(price)),
     })
-
     const { config: usdtApprove } = usePrepareContractWrite({
         address: USDTAdd.address,
         abi: [{
@@ -163,11 +235,11 @@ const Mlm = () => {
         }],
         functionName: "approve",
         args: [TokenSaleAdd.address, parseEther((price) || '0')],
-        enabled: Boolean(buying),
+        enabled: Boolean(price),
     })
 
-    const { data: buypack, write: buypackage, isLoading, isError } = useContractWrite(buyPackage)
-    const { data: usdtapprove, write: approve, isLoading: Approving, isError: isError2 } = useContractWrite(usdtApprove)
+    const { data: buypack, write: buypackage, isLoading } = useContractWrite(buyPackage)
+    const { data: usdtapprove, write: approve, isLoading: Approving } = useContractWrite(usdtApprove)
     const { isLoading: buyloading, isSuccess: buysucces } = useWaitForTransaction({
         hash: buypack?.hash,
     })
@@ -176,34 +248,54 @@ const Mlm = () => {
     })
 
     const buy = (id) => {
-        setPackages(id);
-        setBuying(true);
-    }
-
-    useEffect(() => {
-        if ((Number(allowance) < Number(price)) && buying) {
-            approve?.()
-        }
-        else {
-            if (buying) {
+        if (Number(priceList[id]) === Number(price)) {
+            if (Number(allowance) < Number(price)) {
+                approve?.()
+            }
+            else {
                 buypackage?.()
             }
 
+            console.log("Nè")
         }
-
-    }, [buying])
+        else {
+            setPrice(priceList[id]);
+        }
+    }
 
     useEffect(() => {
-        if (approvesucces) {
+        setPriceList([...priceList, price1, price2, price3, price4])
+    }, [])
+
+
+    useEffect(() => {
+        const referalValue = new URLSearchParams(location.search).get("user_address");
+
+        if (referalValue && referalValue !== address && address) {
+            const headers = {
+                'ngrok-skip-browser-warning': '69240',
+            };
+
+            axios.get(`https://7d22-125-235-238-29.ngrok-free.app/referral?user_address=0x96998C9ce6b5f179829E9CFE2d4B1505E43d7F1e`, {
+                headers: headers,
+            })
+                .then((response) => {
+                    console.log(response.data);
+                })
+                .catch((error) => {
+                    console.error('Error fetching data:', error);
+                });
+        }
+    }, [address])
+
+    useEffect(() => {
+        if (Number(allowance) < Number(price)) {
+            approve?.()
+        }
+        else {
             buypackage?.()
         }
-    }, [approvesucces])
-
-    useEffect(() => {
-        if (buysucces || isError || isError2) {
-            setBuying(false)
-        }
-    }, [buysucces, isError, isError2])
+    }, [price])
 
     const statusstyle = {
         width: `calc(${Number(slot) * 50 / 10000}% + 1%)` /*100%*/
@@ -224,7 +316,7 @@ const Mlm = () => {
                             <div><img src={value2} />Cap : <span> $99.9M</span></div>
                         </div>
                         <div className='mlm-buy'>
-                            <button disabled={!isConnected || approveloading || Approving || isLoading} onClick={() => buy(1)}> {(isLoading || buyloading) ? 'Buying...' : (approveloading || Approving) ? 'Approving' : 'Buy Now'}</button>
+                            <button disabled={!isConnected || (approveloading && !approvesucces) || Approving || isLoading || (buyloading && !buysucces)} onClick={() => buy(1)}> {(isLoading || (buyloading && !buysucces)) ? 'Buying...' : ((approveloading && !approvesucces) || Approving) ? 'Approving' : 'Buy Now'}</button>
                         </div>
                     </div>
                 </div>
@@ -243,7 +335,7 @@ const Mlm = () => {
                             <div><img src={value3} />Cap : <span> $99.8M</span></div>
                         </div>
                         <div className='mlm-buy'>
-                            <button disabled={!isConnected || approveloading || Approving || isLoading} onClick={() => buy(2)}> {(isLoading || buyloading) ? 'Buying...' : (approveloading || Approving) ? 'Approving' : 'Buy Now'}</button>
+                            <button disabled={!isConnected || (approveloading && !approvesucces) || Approving || isLoading || (buyloading && !buysucces)} onClick={() => buy(2)}> {(isLoading || (buyloading && !buysucces)) ? 'Buying...' : ((approveloading && !approvesucces) || Approving) ? 'Approving' : 'Buy Now'}</button>
                         </div>
                     </div>
                 </div>
@@ -262,7 +354,7 @@ const Mlm = () => {
                             <div><img src={value4} />Cap : <span> $99.5M</span></div>
                         </div>
                         <div className='mlm-buy'>
-                            <button disabled={!isConnected || approveloading || Approving || isLoading} onClick={() => buy(3)}> {(isLoading || buyloading) ? 'Buying...' : (approveloading || Approving) ? 'Approving' : 'Buy Now'}</button>
+                            <button disabled={!isConnected || (approveloading && !approvesucces) || Approving || isLoading || (buyloading && !buysucces)} onClick={() => buy(3)}> {(isLoading || (buyloading && !buysucces)) ? 'Buying...' : ((approveloading && !approvesucces) || Approving) ? 'Approving' : 'Buy Now'}</button>
                         </div>
                     </div>
                 </div>
@@ -286,7 +378,7 @@ const Mlm = () => {
                             <div><img src={value1} />Cap : <span> $100M</span></div>
                         </div>
                         <div className='mlm-buy'>
-                            <button disabled={!isConnected || approveloading || Approving || isLoading} onClick={() => buy(0)}> {(isLoading || buyloading) ? 'Buying...' : (approveloading || Approving) ? 'Approving...' : 'Buy Now'}</button>
+                            <button disabled={!isConnected || (approveloading && !approvesucces) || Approving || isLoading || (buyloading && !buysucces)} onClick={() => buy(0)}> {(isLoading || (buyloading && !buysucces)) ? 'Buying...' : ((approveloading && !approvesucces) || Approving) ? 'Approving...' : 'Buy Now'}</button>
                         </div>
                     </div>
                 </div>
