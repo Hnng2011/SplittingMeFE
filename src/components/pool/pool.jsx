@@ -247,33 +247,33 @@ function Poolitem({ pooladdress }) {
         cacheTime: 2_000,
         select: (data) => formatEther(data)
     })
-    // const { data: ballanceyouadd } = useContractRead({
-    //     address: data,
-    //     abi: [{
-    //         "inputs": [
-    //             {
-    //                 "internalType": "address",
-    //                 "name": "",
-    //                 "type": "address"
-    //             }
-    //         ],
-    //         "name": "balancesAddPool",
-    //         "outputs": [
-    //             {
-    //                 "internalType": "uint256",
-    //                 "name": "",
-    //                 "type": "uint256"
-    //             }
-    //         ],
-    //         "stateMutability": "view",
-    //         "type": "function"
-    //     }],
-    //     functionName: "balancesAddPool",
-    //     args: [address],
-    //     enabled: Boolean(address),
-    //     watch: true,
-    //     select: (data) => formatEther(data)
-    // })
+    const { data: ballanceyouadd } = useContractRead({
+        address: pooladdress,
+        abi: [{
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "",
+                    "type": "address"
+                }
+            ],
+            "name": "balancesAddPool",
+            "outputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        }],
+        functionName: "balancesAddPool",
+        args: [address],
+        enabled: Boolean(address),
+        watch: true,
+        select: (data) => formatEther(data)
+    })
     const { config: TokenApprove } = usePrepareContractWrite({
         address: Pooltoken?.[3],
         abi: [{
@@ -393,22 +393,22 @@ function Poolitem({ pooladdress }) {
         enabled: Boolean(parseFloat(allowanceusdt) > parseFloat((usdtfram ?? 0))) && Boolean(usdtfram)
     })
 
-    // const { config: WithDraw } = usePrepareContractWrite({
-    //     address: data,
-    //     abi: [{
-    //         "inputs": [],
-    //         "name": "withdrawPool",
-    //         "outputs": [],
-    //         "stateMutability": "nonpayable",
-    //         "type": "function"
-    //     }],
-    //     functionName: "withdrawPool",
-    //     enabled: false,
-    // })
+    const { config: WithDraw } = usePrepareContractWrite({
+        address: pooladdress,
+        abi: [{
+            "inputs": [],
+            "name": "withdrawPool",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        }],
+        functionName: "withdrawPool",
+        enabled: Boolean(parseFloat(ballanceyouadd) > 0),
+    })
 
     const { data: addpool, write: add, isLoading: loadadd } = useContractWrite(AddPool)
     const { data: frampool, write: fram, isLoading: loadfram } = useContractWrite(FramPool)
-    // const { data: withdraw, write: draw, isLoading: loaddraw } = useContractWrite(WithDraw)
+    const { data: withdraw, write: draw, isLoading: loaddraw } = useContractWrite(WithDraw)
 
     const { isLoading: AddPoolLoading } = useWaitForTransaction({
         enabled: Boolean(addpool),
@@ -418,10 +418,10 @@ function Poolitem({ pooladdress }) {
         enabled: Boolean(frampool),
         hash: frampool?.hash,
     })
-    // const { isLoading: withdrawLoading } = useWaitForTransaction({
-    //     enabled: Boolean(address),
-    //     hash: withdraw?.hash,
-    // })
+    const { isLoading: withdrawLoading } = useWaitForTransaction({
+        enabled: Boolean(address),
+        hash: withdraw?.hash,
+    })
 
     const addPool = () => {
         if (parseFloat(allowancetoken) < parseFloat(tokenadd)) {
@@ -440,8 +440,6 @@ function Poolitem({ pooladdress }) {
             fram?.()
         }
     }
-
-
     const handleinput = (e, mode) => {
         const regex = /^[0-9]*\.?[0-9]*$/;
         if (regex.test(e.target.value)) {
@@ -496,7 +494,7 @@ function Poolitem({ pooladdress }) {
                     <input className='inputquantpool2' placeholder='0' value={usdtfram} onChange={(e) => handleinput(e, 'fram')}></input>
                     <button disabled={!address || (loadadd || AddPoolLoading || loadapprovetoken || (LoadingTokenApprove && !SuccessTokenApprove))} className='stake2' onClick={() => framPool()}> {((LoadingUSDTApprove && !SuccessUSDTApprove) || loadapproveusdt || FramPoolLoading || loadfram) ? 'Framing...' : 'Fram Pool'}</button>
                 </div>
-                <button disabled={!address /* || !Number(ballanceyouadd?.data) > 0 */} /* onClick={() => draw?.()} */ className='harvest'>{/* (loaddraw || withdrawLoading) ? 'Withdrawing..' :  */'Withdraw'}</button >
+                <button disabled={!address} onClick={() => draw?.()} className='harvest'>{(loaddraw || withdrawLoading) ? 'Withdrawing..' : 'Withdraw'}</button >
             </div>
         </div >
     )

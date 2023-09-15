@@ -1,12 +1,13 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useAccount } from 'wagmi';
 import { useContractWrite, usePrepareContractWrite, useContractRead, useWaitForTransaction } from 'wagmi'
 import AddSlot from '../assets/deployment/FactoryToken.json'
 import NFTSpl from '../assets/deployment/NFTSplittingME.json'
 import './mint.css'
 import { useDebounce } from 'use-debounce';
-import { formatEther } from 'viem'
-import { parseEther } from 'viem'
+import { formatEther, parseEther } from 'viem'
+import axios from 'axios';
+import { name } from 'faker/lib/locales/az';
 
 function MintTokenList(data) {
     const { address } = useAccount()
@@ -127,7 +128,6 @@ function Minttoken(data) {
             }
         }
     }
-
 
     const showtokencontract = () => {
         navigator.clipboard.writeText(String(data.data))
@@ -312,9 +312,15 @@ const NFTcreate = ({ data }) => {
 
 const Mint = () => {
     const [mode, setMode] = useState('NFT')
-    const [addAdress, setAddAdress] = useState(null)
-    const [findAdress, setFindAdress] = useState(null)
     const { address } = useAccount()
+    const [addAdress, setAddAdress] = useState(null)
+    const [uri, setURI] = useState('')
+    const [url, setURL] = useState('')
+    const [selectedImage, setSelectedImage] = useState(null);
+    const [description, setDescription] = useState('');
+    const [name, setName] = useState('');
+    const [waiting, setWaiting] = useState(false)
+    const fileInputRef = useRef(null);
 
     const { config: addSlot } = usePrepareContractWrite({
         address: AddSlot.address,
@@ -334,52 +340,6 @@ const Mint = () => {
         functionName: 'addSlotMintNFT',
         args: [addAdress],
         enabled: Boolean(addAdress)
-    })
-
-    const { config: mintNFT } = usePrepareContractWrite({
-        address: AddSlot.address,
-        abi: [{
-            "inputs": [
-                {
-                    "internalType": "string",
-                    "name": "_tokenURI",
-                    "type": "string"
-                }
-            ],
-            "name": "mintNFT",
-            "outputs": [],
-            "stateMutability": "nonpayable",
-            "type": "function"
-        }],
-        functionName: 'mintNFT',
-        args: ['nullish'],
-    })
-
-    const { data: SlotCheck } = useContractRead({
-        address: AddSlot.address,
-        abi: [{
-            "inputs": [
-                {
-                    "internalType": "address",
-                    "name": "",
-                    "type": "address"
-                }
-            ],
-            "name": "slotMintNFT",
-            "outputs": [
-                {
-                    "internalType": "uint256",
-                    "name": "",
-                    "type": "uint256"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-        }],
-        functionName: 'slotMintNFT',
-        args: [findAdress],
-        enabled: Boolean[findAdress],
-        watch: true,
     })
 
     const { data: Slot } = useContractRead({
@@ -464,7 +424,49 @@ const Mint = () => {
     })
 
     const { isLoading, isSuccess, write: addslot } = useContractWrite(addSlot)
-    const { isLoading: isLoading3, isSuccess: isSuccess3, write: mintnft } = useContractWrite(mintNFT)
+    const { isLoading: isLoading3, write: mintting, data: mint } = useContractWrite({
+        address: AddSlot.address,
+        abi: [{
+            "inputs": [
+                {
+                    "internalType": "string",
+                    "name": "_tokenURI",
+                    "type": "string"
+                }
+            ],
+            "name": "mintNFT",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        }],
+        functionName: 'mintNFT',
+        args: [String(uri)],
+    })
+    const { isLoading: loadingmint, isSuccess: successmint } = useWaitForTransaction({
+        hash: mint?.hash,
+    })
+
+    useEffect(() => {
+        if (uri) {
+            setURL(uri?.url)
+        }
+    }, [uri])
+
+    useEffect(() => {
+        if (url) {
+            mintting()
+        }
+    }, [url])
+
+
+    useEffect(() => {
+        if (successmint) {
+            setSelectedImage(null)
+            setDescription('')
+            setName('')
+            setWaiting(false)
+        }
+    })
 
     const handleChangeMode = (mode) => {
         setMode(mode)
@@ -475,6 +477,74 @@ const Mint = () => {
             addslot?.()
         }
     }
+
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+
+        reader.onload = () => {
+            // Đọc dữ liệu ảnh thành base64 và lưu trong state
+            setSelectedImage(reader.result);
+        };
+
+        if (file) {
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleCustomFileInput = () => {
+        fileInputRef.current.click();
+    };
+
+    const nftmint = async () => {
+        setWaiting(true)
+        function extractBase64Data(dataUrl) {
+            // Tách chuỗi thành mảng bằng dấu ","
+            const parts = dataUrl.split(',');
+
+            // Kiểm tra xem có ít nhất 2 phần tử trong mảng
+            if (parts.length >= 2) {
+                // Lấy phần tử thứ hai (chứa dữ liệu base64)
+                const base64Data = parts[1];
+
+                return base64Data;
+            } else {
+                // Trả về null hoặc thông báo lỗi nếu không tìm thấy
+                return null;
+            }
+        }
+
+        const dataToSend = {
+            name: name,
+            description: description,
+            image: extractBase64Data(selectedImage),
+        };
+
+        const headers = {
+            'Content-Type': 'application/json',
+            'ngrok-skip-browser-warning': '555',
+        };
+
+        fetch('https://7fdf-125-235-238-29.ngrok-free.app/ipfs', {
+            method: "POST",
+            headers: headers,
+            body: JSON.stringify(dataToSend),
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then((data) => {
+                console.log(data.data?.url)
+                setURI(data.data)
+            })
+            .catch((error) => {
+                console.error('Lỗi khi đăng bài:', error);
+            });
+    };
+
     return (
 
         <div className='mint_container' >
@@ -488,9 +558,20 @@ const Mint = () => {
                 mode === 'NFT' &&
                 <div className='mint_nft'>
                     <i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i><i class="rain"></i>
-                    <img src='https://cdn.dribbble.com/users/260537/screenshots/3981198/dribbble_animation.gif' alt='Splittingme' />
-                    <button disabled={String(Slot) === '0'} onClick={() => mintnft?.()}> {isLoading3 ? 'Pending' : String(Slot) === '0' ? 'No Slot Left' : 'Mint'}</button>
-                    <div> {isSuccess3 ? "Success" : ''}</div>
+                    <img src={selectedImage || 'https://cdn.dribbble.com/users/260537/screenshots/3981198/dribbble_animation.gif'} alt='Splittingme' />
+                    <textarea rows="4" className='descript' placeholder='Name' value={name} onChange={(e) => setName(e.target.value)}></textarea>
+                    <textarea rows="4" className='descript' placeholder='Description' value={description} onChange={(e) => setDescription(e.target.value)}></textarea>
+                    <div className='buttonmintnft'>
+                        <input
+                            type="file"
+                            accept="image/*"
+                            ref={fileInputRef}
+                            style={{ display: 'none' }}
+                            onChange={handleImageChange}
+                        />
+                        <button disabled={!address} onClick={handleCustomFileInput}>Choose Imgage</button>
+                        <button disabled={String(Slot) === '0' || !selectedImage || isLoading3 || (loadingmint && !successmint) || !name || !description || waiting} onClick={() => nftmint()}> {(isLoading3 || (loadingmint && !successmint) || waiting) ? 'Pending...' : String(Slot) === '0' ? 'No Slot Left' : 'Mint'}</button>
+                    </div>
                 </div>
             }
 
@@ -517,10 +598,6 @@ const Mint = () => {
                     <input type="text" name="addAdress" value={addAdress} onChange={e => setAddAdress(e.target.value)} />
                     <label className='.header'>Status: {isSuccess ? "Add Success" : ""}</label>
                     <button onClick={() => handleAddAddress()}>{isLoading ? 'Pending...' : 'Add Address'}</button>
-
-                    <label className='.header'>Check Address to Mint</label>
-                    <input type="text" name="addAdress" value={findAdress} onChange={e => setFindAdress(e.target.value)} />
-                    <label className='.header'>Status: {SlotCheck ? `${String(SlotCheck)} mint times` : ""}</label>
                 </div>
             }
         </div >

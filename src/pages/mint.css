@@ -3506,10 +3506,11 @@
 
 .mint_nft img {
     height: 20vw;
-    margin-bottom: 15%;
+    margin-bottom: 10%;
     aspect-ratio: 1 / 1;
     border-radius: 50px;
     filter: drop-shadow(20px 20px 20px rgba(0, 0, 0, 0.395));
+    background-color: black;
 }
 
 .mint_nft.header {
@@ -3517,18 +3518,46 @@
     margin-top: 10%;
 }
 
-.mint_nft input {
-    border-bottom: 2px solid white;
+.mint_nft textarea {
     background-color: rgba(0, 0, 0, 0.626);
     backdrop-filter: blur(10px);
-    width: 20vw;
-    height: 8%;
-    margin: 5% 0;
+    outline: none;
+    border: none;
+    width: 16vw;
+    height: 10%;
+    border-radius: 5px;
+    text-align: center;
+    color: white;
 }
 
-.mint_nft button {
-    margin-top: 5%;
+.mint_nft input {
+    background-color: rgba(0, 0, 0, 0.626);
+    backdrop-filter: blur(10px);
+    outline: none;
+    border: none;
+    width: 20vw;
+    height: 10%;
+    border-radius: 5px;
+    text-align: center;
+    color: white;
     margin-bottom: 15%;
+}
+
+textarea {
+    resize: none;
+    margin-bottom: 5%;
+  }
+
+
+.buttonmintnft {
+    display: flex;
+    width: 20vw;
+    justify-content: space-evenly;
+}
+
+.buttonmintnft button{
+    padding: 15px;
+    border-radius: 10px;
 }
 
 .mint_token {
@@ -3651,6 +3680,8 @@
 .contract-header {
     width: fit-content;
 }
+
+
 
 @media (max-width: 991px) {
     .NFTswicthToken {
