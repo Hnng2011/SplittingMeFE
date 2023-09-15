@@ -31,7 +31,7 @@ const getnonce = async (msg, getMsg, address) => {
         'ngrok-skip-browser-warning': '69240',
     };
 
-    axios.get(`https://55e3-2405-4802-900b-5590-5b0e-b02a-d1b7-599.ngrok-free.app/referral?user_address=${address}`, {
+    axios.get(`https://7fdf-125-235-238-29.ngrok-free.app/referral?user_address=${address}`, {
         headers: headers,
     })
         .then((response) => {
@@ -65,7 +65,7 @@ function sign_ref_server(user_address, referral_address, signature, nonce) {
         }
     };
 
-    fetch("https://55e3-2405-4802-900b-5590-5b0e-b02a-d1b7-599.ngrok-free.app/referral", requestOptions)
+    fetch("https://7fdf-125-235-238-29.ngrok-free.app/referral", requestOptions)
         .then(response => response.text())
         .then(result => console.log(result))
         .catch(error => console.log('error', error));
