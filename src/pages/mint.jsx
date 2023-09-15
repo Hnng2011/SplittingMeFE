@@ -440,7 +440,7 @@ const Mint = () => {
             "type": "function"
         }],
         functionName: 'mintNFT',
-        args: [String(uri)],
+        args: [String(url)],
     })
     const { isLoading: loadingmint, isSuccess: successmint } = useWaitForTransaction({
         hash: mint?.hash,
@@ -537,7 +537,6 @@ const Mint = () => {
                 return response.json();
             })
             .then((data) => {
-                console.log(data.data?.url)
                 setURI(data.data)
             })
             .catch((error) => {
