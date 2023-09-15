@@ -21,7 +21,7 @@ const shortenMiddle = (inputString, keepLength) => {
     return `${start}...${end}`;
 };
 
-function NFT({ data, address }) {
+function NFT({ data, address, shop }) {
     const [modalShow, setModalShow] = useState(false);
     const [mode, setMode] = useState('')
 
@@ -200,69 +200,134 @@ function NFT({ data, address }) {
     }
 
     return (
-        <div className="sc-product style2">
-            <div className="top">
-                <div className="tag">{data}</div>
-            </div>
-            <div className="bottom">
-                <div className="details-product">
-                    <div className="author">
-                        <div className="avatar">
-                            <img src='https://pub-static.fotor.com/assets/projects/pages/d5bdd0513a0740a8a38752dbc32586d0/fotor-03d1a91a0cec4542927f53c87e0599f6.jpg' alt="images" />
+        <>{
+            (shop === 'Market') ?
+                <div className="col-xl-3 col-lg-4 col-md-6 col-sm-6 tf-loadmore 3d cyber">
+                    <div className="sc-product style2">
+                        <div className="top">
+                            <div className="tag">{data}</div>
                         </div>
-                        <div className="content">
-                            <div className="position">Owner</div>
-                            <div className="name">{shortenMiddle(String((pricenft?.[1]) ?? '0'), 12)}</div>
+                        <div className="bottom">
+                            <div className="details-product">
+                                <div className="author">
+                                    <div className="avatar">
+                                        <img src='https://pub-static.fotor.com/assets/projects/pages/d5bdd0513a0740a8a38752dbc32586d0/fotor-03d1a91a0cec4542927f53c87e0599f6.jpg' alt="images" />
+                                    </div>
+                                    <div className="content">
+                                        <div className="position">Owner</div>
+                                        <div className="name">{shortenMiddle(String((pricenft?.[1]) ?? '0'), 12)}</div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
+                        <div className="features">
+                            <div className="product-media">
+                                <img src='https://toquoc.mediacdn.vn/280518851207290880/2023/4/28/screenshot3-1682666317502330816495.png' alt="images" />
+                            </div>
+                            <div className="rain-drop1"><img src={icon1} alt="images" /></div>
+                            <div className="rain-drop2"><img src={icon2} alt="images" /></div>
+                        </div>
+                        <div className="bottom-style2">
+                            <div className="price">
+                                <div className="icon"><img src={icon3} alt="images" /></div>
+                                <div className="content">
+                                    <div className="cash">{String(formatEther((pricenft?.[2]) ?? 0))}</div>
+                                    <div className="name">USDT</div>
+                                </div>
+                            </div>
+
+                            {
+                                address === String(pricenft?.[1]) ?
+                                    <>
+                                        <Link to='' onClick={() => { Edit() }} className="button-cus m-cus"> {((LoadingUSDTApprove && !approveSucces) || loadapproveusdt) ? 'Approving..' : (LoadingbuyNFT || buynftload) ? 'Buying' : 'Edit'}</Link>
+                                        <Link to='' onClick={() => { Cancel() }} className="button-cus"> {(cancelload || CancelNFT) ? 'Cancelling' : 'Cancel'}</Link>
+                                    </>
+
+                                    : <Link to='' onClick={() => { Purchase() }} className="button-cus"> {((LoadingUSDTApprove && !approveSucces) || loadapproveusdt) ? 'Approving..' : (LoadingbuyNFT || buynftload) ? 'Buying' : 'Purchase'}</Link>
+                            }
+
+
+
+                        </div>
+
+                        <CardModal
+                            show={modalShow}
+                            mode={mode}
+                            id={data}
+                            onHide={() => setModalShow(false)}
+                        />
                     </div>
                 </div>
-            </div>
-            <div className="features">
-                <div className="product-media">
-                    <img src='https://toquoc.mediacdn.vn/280518851207290880/2023/4/28/screenshot3-1682666317502330816495.png' alt="images" />
-                </div>
-                <div className="rain-drop1"><img src={icon1} alt="images" /></div>
-                <div className="rain-drop2"><img src={icon2} alt="images" /></div>
-            </div>
-            <div className="bottom-style2">
-                <div className="price">
-                    <div className="icon"><img src={icon3} alt="images" /></div>
-                    <div className="content">
-                        <div className="cash">{String(formatEther((pricenft?.[2]) ?? 0))}</div>
-                        <div className="name">USDT</div>
+                : (shop === 'MyNFT' && address === pricenft?.[1]) ?
+                    <div className="col-xl-3 col-lg-4 col-md-6 col-sm-6 tf-loadmore 3d cyber">
+                        < div className="sc-product style2">
+                            <div className="top">
+                                <div className="tag">{data}</div>
+                            </div>
+                            <div className="bottom">
+                                <div className="details-product">
+                                    <div className="author">
+                                        <div className="avatar">
+                                            <img src='https://pub-static.fotor.com/assets/projects/pages/d5bdd0513a0740a8a38752dbc32586d0/fotor-03d1a91a0cec4542927f53c87e0599f6.jpg' alt="images" />
+                                        </div>
+                                        <div className="content">
+                                            <div className="position">Owner</div>
+                                            <div className="name">{shortenMiddle(String((pricenft?.[1]) ?? '0'), 12)}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="features">
+                                <div className="product-media">
+                                    <img src='https://toquoc.mediacdn.vn/280518851207290880/2023/4/28/screenshot3-1682666317502330816495.png' alt="images" />
+                                </div>
+                                <div className="rain-drop1"><img src={icon1} alt="images" /></div>
+                                <div className="rain-drop2"><img src={icon2} alt="images" /></div>
+                            </div>
+                            <div className="bottom-style2">
+                                <div className="price">
+                                    <div className="icon"><img src={icon3} alt="images" /></div>
+                                    <div className="content">
+                                        <div className="cash">{String(formatEther((pricenft?.[2]) ?? 0))}</div>
+                                        <div className="name">USDT</div>
+                                    </div>
+                                </div>
+
+                                {
+                                    address === String(pricenft?.[1]) ?
+                                        <>
+                                            <Link to='' onClick={() => { Edit() }} className="button-cus m-cus"> {((LoadingUSDTApprove && !approveSucces) || loadapproveusdt) ? 'Approving..' : (LoadingbuyNFT || buynftload) ? 'Buying' : 'Edit'}</Link>
+                                            <Link to='' onClick={() => { Cancel() }} className="button-cus"> {(cancelload || CancelNFT) ? 'Cancelling' : 'Cancel'}</Link>
+                                        </>
+
+                                        : <Link to='' onClick={() => { Purchase() }} className="button-cus"> {((LoadingUSDTApprove && !approveSucces) || loadapproveusdt) ? 'Approving..' : (LoadingbuyNFT || buynftload) ? 'Buying' : 'Purchase'}</Link>
+                                }
+
+
+
+                            </div>
+
+                            <CardModal
+                                show={modalShow}
+                                mode={mode}
+                                id={data}
+                                onHide={() => setModalShow(false)}
+                            />
+                        </div >
                     </div>
-                </div>
-
-                {
-                    address === String(pricenft?.[1]) ?
-                        <>
-                            <Link to='' onClick={() => { Edit() }} className="button-cus m-cus"> {((LoadingUSDTApprove && !approveSucces) || loadapproveusdt) ? 'Approving..' : (LoadingbuyNFT || buynftload) ? 'Buying' : 'Edit'}</Link>
-                            <Link to='' onClick={() => { Cancel() }} className="button-cus"> {(cancelload || CancelNFT) ? 'Cancelling' : 'Cancel'}</Link>
-                        </>
-
-                        : <Link to='' onClick={() => { Purchase() }} className="button-cus"> {((LoadingUSDTApprove && !approveSucces) || loadapproveusdt) ? 'Approving..' : (LoadingbuyNFT || buynftload) ? 'Buying' : 'Purchase'}</Link>
-                }
-
-
-
-            </div>
-
-            <CardModal
-                show={modalShow}
-                mode={mode}
-                id={data}
-                onHide={() => setModalShow(false)}
-            />
-        </div>
-
+                    : <div className='dp-none'></div>
+        }
+        </>
     )
 }
 
 
 
 
-function HotPick({ data }) {
+function HotPick({ data, mode }) {
     const { address } = useAccount()
+
+
     return (
         <section className="tf-hot-pick">
             <div className="tf-container">
@@ -277,9 +342,7 @@ function HotPick({ data }) {
                             <div className="row tf-filter-container wow fadeInUp">
                                 {
                                     data?.map(idx => (
-                                        <div key={idx} className="col-xl-3 col-lg-4 col-md-6 col-sm-6 tf-loadmore 3d cyber">
-                                            <NFT data={String(idx)} address={address} />
-                                        </div>
+                                        <NFT data={String(idx)} address={address} shop={mode} />
                                     ))
                                 }
                             </div>

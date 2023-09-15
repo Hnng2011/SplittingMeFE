@@ -480,7 +480,7 @@ const Swap = () => {
                                 <img className="arrow" src={arrow} alt="down2" />
                             </div>
                         </div>
-                        <h3>Balance: {(balance ?? 0)} {symbol}</h3>
+                        <h3>Balance: {(balance || '0')} {symbol}</h3>
                     </div>
                     <button disabled={!address || !quantity || (swapping && !swapsuccess) || (approving && !approvesuccess) || swapload || loadapproveusdt || loadapprovetoken || (approvingtoken && !approvetokensuccess)} onClick={() => swap()}>{((swapping && !swapsuccess) || (approving && approvesuccess) || swapload || loadapproveusdt || loadapprovetoken || (approvingtoken && !approvetokensuccess)) ? 'Swapping' : 'Swap'}</button>
                 </div>

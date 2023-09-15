@@ -222,7 +222,8 @@ const NFTcreate = ({ data }) => {
         }],
         functionName: 'createNewCampaign',
         args: [finalnameToken, finalsymbolToken, data],
-        enabled: Boolean(finalnameToken && finalsymbolToken)
+        enabled: Boolean(finalnameToken && finalsymbolToken),
+
     })
 
     const { config: approvenft } = usePrepareContractWrite({
@@ -377,7 +378,8 @@ const Mint = () => {
         }],
         functionName: 'slotMintNFT',
         args: [findAdress],
-        enabled: Boolean[findAdress]
+        enabled: Boolean[findAdress],
+        watch: true,
     })
 
     const { data: Slot } = useContractRead({
@@ -403,7 +405,8 @@ const Mint = () => {
         }],
         functionName: 'slotMintNFT',
         args: [address],
-        enabled: Boolean[address]
+        enabled: Boolean[address],
+        watch: true,
     })
 
     const { data: NFTList } = useContractRead({
@@ -429,7 +432,8 @@ const Mint = () => {
         }],
         functionName: 'getAllNFT',
         args: [address],
-        enabled: Boolean[address]
+        enabled: Boolean[address],
+        watch: true,
     })
 
     const { data: TokenList } = useContractRead({
@@ -455,7 +459,8 @@ const Mint = () => {
         }],
         functionName: 'getAllCampaignsByOwner',
         args: [address],
-        enabled: Boolean[address]
+        enabled: Boolean[address],
+        watch: true,
     })
 
     const { isLoading, isSuccess, write: addslot } = useContractWrite(addSlot)

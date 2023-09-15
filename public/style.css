@@ -1962,3 +1962,32 @@ button:hover:disabled {
 .button-popup {
   width: 100%;
 }
+
+.dp-none {
+  display: none;
+}
+
+.btn-market {
+  margin: 2% 3%;
+  display: flex;
+  gap: 1%;
+}
+
+.btn-market button {
+  border-radius: 10px;
+  background-color: transparent;
+  color: gold;
+  outline: 2px solid gold;
+  transition: 0.2s ease;
+}
+
+.btn-market button.active {
+  background-color: gold;
+  color: black;
+}
+
+.btn-market button.on {
+  display: none;
+}
+
+

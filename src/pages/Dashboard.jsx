@@ -45,7 +45,8 @@ function Dashboard() {
         }],
         functionName: 'getAllNFT',
         args: [address],
-        enabled: Boolean[address]
+        enabled: Boolean[address],
+        watch: true,
     })
 
 
@@ -90,10 +91,9 @@ function Dashboard() {
                                 <div className="dashboard-user">
                                     <div className="dashboard-infor">
                                         <div className="avatar">
-                                            <img src={avt} alt="images" />
+                                            <img src={'https://vapa.vn/wp-content/uploads/2022/12/hinh-de-thuong-don-gian-003.jpg'} alt="images" />
                                         </div>
                                         <div className="pax">{address && shortenMiddle(address, 9)}</div>
-                                        <div className="pax">{address && 'Your SPM Balance: 78'}</div>
                                     </div>
                                 </div>
                             </div>
