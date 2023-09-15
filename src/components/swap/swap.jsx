@@ -341,9 +341,17 @@ const Swap = () => {
             setQuantity(e.target.value);
         }
 
-        if (parseFloat(e.target.value) > parseFloat(balance)) {
-            setQuantity(balance);
+        if (mode) {
+            if (parseFloat(e.target.value) > parseFloat(balance)) {
+                setQuantity(balance);
+            }
         }
+        else {
+            if (parseFloat(e.target.value) > parseFloat(usdtbalance)) {
+                setQuantity(usdtbalance);
+            }
+        }
+
     }
 
     const handleAddActiveClass = () => {

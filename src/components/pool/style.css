@@ -104,7 +104,7 @@
     width: 100%;
     background-color: #35353B;
     display: flex;
-    height: 80px;
+    height: 120px;
     align-items: center;
     text-align: center;
     border-bottom: 1px solid #B3B3B3;
@@ -170,13 +170,35 @@
     font-weight: 700;
 }
 
-.stake , .harvest {
-    width: 30%;
-    height: 50%;
+.stake1 , .stake2 , .harvest {
+    width: 40%;
+    height: 40%;
     font-size: 13px;
     padding: 0;
     margin: 0;
     border-radius: 10px;
+    position:relative;
+}
+
+.stake1 , .stake2 {
+    width: 100%;
+}
+
+.addfram {
+    width: 30%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 5%;
+}
+
+.addfram input {
+    border-radius: 10px;
+    outline: none;
+    border: none;
+    padding: 2px 5px;
 }
 
 .harvest {

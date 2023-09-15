@@ -1,12 +1,86 @@
 import { useState } from 'react';
 import './style.css';
-import { useContractRead, usePrepareContractWrite, useContractWrite, useWaitForTransaction } from 'wagmi';
+import { useContractRead, usePrepareContractWrite, useContractWrite, useWaitForTransaction, useAccount } from 'wagmi';
 import FactoryPool from '../../assets/deployment/FactoryPool.json'
 import USDT from '../../assets/deployment/USDT.json'
 import { parseEther, formatEther } from 'viem';
 
-function Poolitem({ data, address }) {
-    const [usdtfram, setUsdtfram] = useState(1000)
+function Tokenname(Pooltoken) {
+    const { data: tokenname } = useContractRead({
+        address: Pooltoken?.[3],
+        abi: [{
+            "inputs": [],
+            "name": "symbol",
+            "outputs": [
+                {
+                    "internalType": "string",
+                    "name": "",
+                    "type": "string"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        }],
+        functionName: 'symbol',
+        enabled: Boolean(Pooltoken)
+    })
+
+    return tokenname
+}
+
+function USDTtotal(Pooltoken, data) {
+    const { data: usdttotal } = useContractRead({
+        address: data,
+        abi: [{
+            "inputs": [],
+            "name": "poolusdtToken",
+            "outputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        }],
+        functionName: "poolusdtToken",
+        enabled: Boolean(Pooltoken),
+        select: (data) => formatEther(data),
+        watch: true,
+    })
+
+    return usdttotal
+}
+
+function Tokentotal(Pooltoken, data) {
+    const { data: tokentotal } = useContractRead({
+        address: data,
+        abi: [{
+            "inputs": [],
+            "name": "poolToken1",
+            "outputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        }],
+        functionName: "poolToken1",
+        enabled: Boolean(Pooltoken),
+        watch: true,
+    })
+
+    return tokentotal
+}
+
+
+function Poolitem({ pooladdress }) {
+    const { address } = useAccount()
+    const [usdtfram, setUsdtfram] = useState(null)
     const [tokenadd, setTokenadd] = useState(null)
 
     const { data: Pooltoken } = useContractRead({
@@ -45,33 +119,25 @@ function Poolitem({ data, address }) {
             "stateMutability": "view",
             "type": "function"
         }],
-        args: [data],
+        args: [pooladdress],
         functionName: 'campaigns',
-        enabled: Boolean(data)
+        enabled: Boolean(pooladdress)
     })
-    const { data: tokenname } = useContractRead({
-        address: Pooltoken?.[3],
+    const tokenname = Tokenname(Pooltoken)
+    const usdttotal = USDTtotal(Pooltoken, pooladdress)
+    const tokentotal = Tokentotal(Pooltoken, pooladdress)
+
+    const { data: usdtbalance } = useContractRead({
+        address: USDT.address,
         abi: [{
-            "inputs": [],
-            "name": "symbol",
-            "outputs": [
+            "inputs": [
                 {
-                    "internalType": "string",
-                    "name": "",
-                    "type": "string"
+                    "internalType": "address",
+                    "name": "account",
+                    "type": "address"
                 }
             ],
-            "stateMutability": "view",
-            "type": "function"
-        }],
-        functionName: 'symbol',
-        enabled: Boolean(Pooltoken)
-    })
-    const { data: usdttotal } = useContractRead({
-        address: data,
-        abi: [{
-            "inputs": [],
-            "name": "poolusdtToken",
+            "name": "balanceOf",
             "outputs": [
                 {
                     "internalType": "uint256",
@@ -82,16 +148,23 @@ function Poolitem({ data, address }) {
             "stateMutability": "view",
             "type": "function"
         }],
-        functionName: "poolusdtToken",
-        enabled: Boolean(Pooltoken),
+        functionName: 'balanceOf',
+        args: [address],
         select: (data) => formatEther(data),
         watch: true,
+        enabled: Boolean(address),
     })
-    const { data: tokentotal } = useContractRead({
-        address: data,
+    const { data: tokenbalance } = useContractRead({
+        address: Pooltoken?.[3],
         abi: [{
-            "inputs": [],
-            "name": "poolToken1",
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "account",
+                    "type": "address"
+                }
+            ],
+            "name": "balanceOf",
             "outputs": [
                 {
                     "internalType": "uint256",
@@ -102,9 +175,11 @@ function Poolitem({ data, address }) {
             "stateMutability": "view",
             "type": "function"
         }],
-        functionName: "poolToken1",
-        enabled: Boolean(Pooltoken),
+        functionName: 'balanceOf',
+        args: [address],
+        enabled: Boolean(Pooltoken?.[3]),
         watch: true,
+        select: (data) => formatEther(data)
     })
     const { data: allowancetoken } = useContractRead({
         address: Pooltoken?.[3],
@@ -133,9 +208,10 @@ function Poolitem({ data, address }) {
             "type": "function"
         }],
         functionName: "allowance",
-        args: [address, data],
+        args: [address, pooladdress],
         enabled: Boolean(address),
         watch: true,
+        cacheTime: 2_000,
         select: (data) => formatEther(data)
     })
     const { data: allowanceusdt } = useContractRead({
@@ -165,39 +241,39 @@ function Poolitem({ data, address }) {
             "type": "function"
         }],
         functionName: "allowance",
-        args: [address, data],
+        args: [address, pooladdress],
         enabled: Boolean(address),
         watch: true,
+        cacheTime: 2_000,
         select: (data) => formatEther(data)
     })
-    const { data: ballanceyouadd } = useContractRead({
-        address: data,
-        abi: [{
-            "inputs": [
-                {
-                    "internalType": "address",
-                    "name": "",
-                    "type": "address"
-                }
-            ],
-            "name": "balancesAddPool",
-            "outputs": [
-                {
-                    "internalType": "uint256",
-                    "name": "",
-                    "type": "uint256"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-        }],
-        functionName: "balancesAddPool",
-        args: [address],
-        enabled: Boolean(address),
-        watch: true,
-        select: (data) => formatEther(data)
-    })
-
+    // const { data: ballanceyouadd } = useContractRead({
+    //     address: data,
+    //     abi: [{
+    //         "inputs": [
+    //             {
+    //                 "internalType": "address",
+    //                 "name": "",
+    //                 "type": "address"
+    //             }
+    //         ],
+    //         "name": "balancesAddPool",
+    //         "outputs": [
+    //             {
+    //                 "internalType": "uint256",
+    //                 "name": "",
+    //                 "type": "uint256"
+    //             }
+    //         ],
+    //         "stateMutability": "view",
+    //         "type": "function"
+    //     }],
+    //     functionName: "balancesAddPool",
+    //     args: [address],
+    //     enabled: Boolean(address),
+    //     watch: true,
+    //     select: (data) => formatEther(data)
+    // })
     const { config: TokenApprove } = usePrepareContractWrite({
         address: Pooltoken?.[3],
         abi: [{
@@ -225,8 +301,8 @@ function Poolitem({ data, address }) {
             "type": "function"
         }],
         functionName: "approve",
-        args: [data, parseEther('10000')],
-        enabled: Boolean(tokenadd) && Boolean(Number(allowancetoken) < Number(tokenadd)),
+        args: [pooladdress, parseEther('10000')],
+        enabled: Boolean(tokenadd) && Boolean(parseFloat((allowancetoken ?? 0)) < parseFloat(tokenadd)),
     })
     const { config: usdtApprove } = usePrepareContractWrite({
         address: USDT.address,
@@ -255,21 +331,21 @@ function Poolitem({ data, address }) {
             "type": "function"
         }],
         functionName: "approve",
-        args: [data, parseEther('10000')],
-        enabled: Boolean(usdtfram) && Boolean(Number(allowanceusdt) < Number(usdtfram)),
+        args: [pooladdress, parseEther('10000')],
+        enabled: Boolean(usdtfram) && Boolean(parseFloat(allowanceusdt) < parseFloat((usdtfram ?? 0))),
     })
     const { data: tokenapprove, write: approvetoken, isLoading: loadapprovetoken } = useContractWrite(TokenApprove)
     const { data: usdtapprove, write: approveusdt, isLoading: loadapproveusdt } = useContractWrite(usdtApprove)
-    const { isLoading: LoadingTokenApprove } = useWaitForTransaction({
+    const { isLoading: LoadingTokenApprove, isSuccess: SuccessTokenApprove } = useWaitForTransaction({
         enabled: Boolean(tokenapprove),
         hash: tokenapprove?.hash,
     })
-    const { isLoading: LoadingUSDTApprove } = useWaitForTransaction({
+    const { isLoading: LoadingUSDTApprove, isSuccess: SuccessUSDTApprove } = useWaitForTransaction({
         enabled: Boolean(usdtapprove),
         hash: usdtapprove?.hash,
     })
     const { config: AddPool } = usePrepareContractWrite({
-        address: data,
+        address: pooladdress,
         abi: [{
             "inputs": [
                 {
@@ -289,11 +365,11 @@ function Poolitem({ data, address }) {
             "type": "function"
         }],
         functionName: "addPoolToken",
-        args: [Pooltoken?.[3], parseEther('100')],
-        enabled: Boolean(Pooltoken?.[0] === address) && Boolean(Number(allowancetoken) > Number(tokenadd)) && Boolean(tokenadd)
+        args: [Pooltoken?.[3], parseEther(String(tokenadd ?? '0'))],
+        enabled: Boolean(Pooltoken?.[0] === address) && Boolean(parseFloat(allowancetoken) > parseFloat((tokenadd ?? 0))) && Boolean(tokenadd)
     })
     const { config: FramPool } = usePrepareContractWrite({
-        address: data,
+        address: pooladdress,
         abi: [{
             "inputs": [
                 {
@@ -313,25 +389,26 @@ function Poolitem({ data, address }) {
             "type": "function"
         }],
         functionName: "FramPool",
-        args: [USDT.address, parseEther(String(usdtfram))],
-        enabled: Boolean(Number(allowanceusdt) > Number(usdtfram)) && Boolean(usdtfram)
+        args: [USDT.address, parseEther(String(usdtfram ?? '0'))],
+        enabled: Boolean(parseFloat(allowanceusdt) > parseFloat((usdtfram ?? 0))) && Boolean(usdtfram)
     })
-    const { config: WithDraw } = usePrepareContractWrite({
-        address: data,
-        abi: [{
-            "inputs": [],
-            "name": "withdrawPool",
-            "outputs": [],
-            "stateMutability": "nonpayable",
-            "type": "function"
-        }],
-        functionName: "withdrawPool",
-        enabled: false,
-    })
+
+    // const { config: WithDraw } = usePrepareContractWrite({
+    //     address: data,
+    //     abi: [{
+    //         "inputs": [],
+    //         "name": "withdrawPool",
+    //         "outputs": [],
+    //         "stateMutability": "nonpayable",
+    //         "type": "function"
+    //     }],
+    //     functionName: "withdrawPool",
+    //     enabled: false,
+    // })
 
     const { data: addpool, write: add, isLoading: loadadd } = useContractWrite(AddPool)
     const { data: frampool, write: fram, isLoading: loadfram } = useContractWrite(FramPool)
-    const { data: withdraw, write: draw, isLoading: loaddraw } = useContractWrite(WithDraw)
+    // const { data: withdraw, write: draw, isLoading: loaddraw } = useContractWrite(WithDraw)
 
     const { isLoading: AddPoolLoading } = useWaitForTransaction({
         enabled: Boolean(addpool),
@@ -341,27 +418,59 @@ function Poolitem({ data, address }) {
         enabled: Boolean(frampool),
         hash: frampool?.hash,
     })
-    const { isLoading: withdrawLoading } = useWaitForTransaction({
-        enabled: Boolean(address),
-        hash: withdraw?.hash,
-    })
+    // const { isLoading: withdrawLoading } = useWaitForTransaction({
+    //     enabled: Boolean(address),
+    //     hash: withdraw?.hash,
+    // })
+
+    const addPool = () => {
+        if (parseFloat(allowancetoken) < parseFloat(tokenadd)) {
+            approvetoken?.()
+        }
+        else {
+            add?.()
+        }
+    }
+    const framPool = () => {
+        if (parseFloat(allowanceusdt) < parseFloat(usdtfram ?? 0)) {
+            approveusdt?.()
+        }
+        else {
+            console.log()
+            fram?.()
+        }
+    }
 
 
-    const handle = (e) => {
-        if (String(e) === 'add') {
-            if (Number(allowancetoken) < 100) {
-                approvetoken?.()
+    const handleinput = (e, mode) => {
+        const regex = /^[0-9]*\.?[0-9]*$/;
+        if (regex.test(e.target.value)) {
+            if (mode === 'add') {
+                setTokenadd(e.target.value);
             }
             else {
-                add?.()
+                setUsdtfram(e.target.value);
+            }
+
+        }
+
+        if (e.target.value === '') {
+            if (mode === 'add') {
+                setTokenadd(e.target.value);
+            }
+            else {
+                setUsdtfram(e.target.value);
             }
         }
-        else if (String(e) === 'fram') {
-            if (Number(allowanceusdt) < Number(usdtfram)) {
-                approveusdt?.()
+
+        if (mode === 'add') {
+            if (parseFloat(e.target.value) > parseFloat(tokenbalance)) {
+                setTokenadd(tokenbalance);
             }
-            else {
-                fram?.()
+        }
+        else {
+            if (parseFloat(e.target.value) > parseFloat(usdtbalance)) {
+                setUsdtfram(usdtbalance);
             }
         }
     }
@@ -369,28 +478,36 @@ function Poolitem({ data, address }) {
     return (
         <div className='grid-items'>
             < div className='grid-item item1' >
-                <img className="imaging" src='https://upload.wikimedia.org/wikipedia/commons/9/92/Backyardpool.jpg' alt={data.name} />
-                <div className='name'>{data}</div>
+                <img className="imaging" src='https://upload.wikimedia.org/wikipedia/commons/9/92/Backyardpool.jpg' alt={pooladdress} />
+                <div className='name'>{pooladdress}</div>
             </div >
             <div className='grid-item item2'>
                 <div className='title'>Liquidty Pool : </div>
                 <div className='total'>{tokenname}/USDT - {formatEther(String(tokentotal))}/{String(usdttotal)} </div>
             </div>
             <div className='grid-item item3'>
-                {Pooltoken?.[0] === address && <button disabled={(LoadingUSDTApprove || loadapproveusdt || FramPoolLoading || loadfram)} className='stake' onClick={() => handle('add')}> {(loadadd || AddPoolLoading || loadapprovetoken || LoadingTokenApprove) ? 'Adding...' : 'Add Pool'}</button>}
-                <button disabled={!address || (loadadd || AddPoolLoading || loadapprovetoken || LoadingTokenApprove)} className='stake' onClick={() => handle('fram')}> {(LoadingUSDTApprove || loadapproveusdt || FramPoolLoading || loadfram) ? 'Framing...' : 'Fram Pool'}</button>
-                <button disabled={!address || !Number(ballanceyouadd?.data) > 0} onClick={() => draw?.()} className='harvest'>{(loaddraw || withdrawLoading) ? 'Withdrawing..' : 'Withdraw'}</button>
+                {Pooltoken?.[0] === address &&
+                    <div className='addfram'>
+                        <input className='inputquantpool1' placeholder='0' value={tokenadd} onChange={(e) => handleinput(e, 'add')}></input>
+                        <button disabled={((LoadingUSDTApprove && !SuccessUSDTApprove) || loadapproveusdt || FramPoolLoading || loadfram)} className='stake1' onClick={() => addPool()}> {(loadadd || AddPoolLoading || loadapprovetoken || (LoadingTokenApprove && SuccessTokenApprove)) ? 'Adding...' : 'Add Pool'}</button>
+                    </div>
+                }
+                <div className='addfram'>
+                    <input className='inputquantpool2' placeholder='0' value={usdtfram} onChange={(e) => handleinput(e, 'fram')}></input>
+                    <button disabled={!address || (loadadd || AddPoolLoading || loadapprovetoken || (LoadingTokenApprove && !SuccessTokenApprove))} className='stake2' onClick={() => framPool()}> {((LoadingUSDTApprove && !SuccessUSDTApprove) || loadapproveusdt || FramPoolLoading || loadfram) ? 'Framing...' : 'Fram Pool'}</button>
+                </div>
+                <button disabled={!address /* || !Number(ballanceyouadd?.data) > 0 */} /* onClick={() => draw?.()} */ className='harvest'>{/* (loaddraw || withdrawLoading) ? 'Withdrawing..' :  */'Withdraw'}</button >
             </div>
         </div >
     )
 }
 
-function Pool({ datas, address }) {
+function Pool({ datas }) {
     return (
         <div className='grid-container'>
             {datas?.map((data) => (
                 <div key={data}>
-                    <Poolitem data={data} address={address} />
+                    <Poolitem pooladdress={data} />
                 </div>
             ))}
         </div>

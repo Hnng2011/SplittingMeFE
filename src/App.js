@@ -11,10 +11,14 @@ import { WagmiConfig, createConfig, configureChains } from 'wagmi'
 import { sepolia } from 'wagmi/chains';
 import { publicProvider } from 'wagmi/providers/public'
 import { InjectedConnector } from 'wagmi/connectors/injected'
+import { alchemyProvider } from 'wagmi/providers/alchemy'
+import { infuraProvider } from 'wagmi/providers/infura'
 
 const { publicClient, webSocketPublicClient } = configureChains(
     [sepolia],
+    [alchemyProvider({ apiKey: 'bhxiJmeoYfTa4rc33n5r8LWl35R39HvT' })],
     [publicProvider()],
+    [infuraProvider({ apiKey: 'b2fb2fcbd6e6477f9a2e316aea394a0a' })],
 )
 
 const config = createConfig({

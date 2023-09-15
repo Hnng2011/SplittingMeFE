@@ -79,8 +79,8 @@ const Pool = () => {
     const [ratio, setRatio] = useState('')
     const [token, setToken] = useState('')
     const { address } = useAccount()
-    const [valuefee] = useDebounce((Number(fee) * 10000), 300);
-    const [valueratio] = useDebounce((Number(ratio) * 10000), 300);
+    const [valuefee] = useDebounce((Number(fee) * 1000), 300);
+    const [valueratio] = useDebounce((Number(ratio) * 100000), 300);
 
     const { data: TokenList } = useContractRead({
         address: AddSlot.address,
@@ -105,7 +105,7 @@ const Pool = () => {
         }],
         functionName: 'getAllCampaignsByOwner',
         args: [address],
-        enabled: Boolean[address]
+        enabled: Boolean[address] && active
     })
 
     const { data: Poollist } = useContractRead({
@@ -124,6 +124,7 @@ const Pool = () => {
             "type": "function"
         }],
         functionName: 'getCampaignsAddresses',
+        watch: true,
     })
 
     const { config: createNewCampaign } = usePrepareContractWrite({
@@ -172,7 +173,6 @@ const Pool = () => {
         createnewcampaign?.()
     }
 
-
     return (
         <div className='page-explore'>
             <PageTitle title='Pool' />
@@ -195,14 +195,14 @@ const Pool = () => {
                         <div className='inputpoolcreatelist'>
                             <label>Fee</label>
                             <br />
-                            <input value={fee} placeholder={0.1} onChange={(e) => setFee(e.target.value)}></input>
+                            <input value={fee} placeholder={0} onChange={(e) => setFee(e.target.value)}></input>
                         </div>
                         <div className='inputpoolcreatelist'>
                             <label>Ratio</label>
                             <br />
-                            <input value={ratio} placeholder={1} onChange={(e) => setRatio(e.target.value)}></input>
+                            <input value={ratio} placeholder={0} onChange={(e) => setRatio(e.target.value)}></input>
                         </div>
-                        <div className='buttonCreate' onClick={() => handlecreate()}>{((loadingcreatenewcampaign || isLoading) && !isSuccess) ? 'Creating...' : 'Create'}</div>
+                        <button disabled={((loadingcreatenewcampaign || isLoading) && !isSuccess) || (!valuefee && !valueratio)} className='buttonCreate' onClick={() => handlecreate()}>{(((loadingcreatenewcampaign || isLoading) && !isSuccess)) ? 'Creating...' : 'Create'}</button>
                     </div>
                 </>
             }
@@ -226,7 +226,7 @@ const Pool = () => {
                 </div>
 
                 <button onClick={() => setActive(!active)} className='createpool'><span>+</span> Create Pool</button>
-                <PoolList datas={Poollist} address={address} />
+                <PoolList datas={Poollist} />
             </section>
         </div>
     )

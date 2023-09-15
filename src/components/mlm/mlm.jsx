@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import './mlm.css'
-import { usePrepareContractWrite, useContractWrite, useAccount, useContractRead, useWaitForTransaction } from 'wagmi'
+import { usePrepareContractWrite, useContractWrite, useAccount, useContractRead, useWaitForTransaction, useSignMessage } from 'wagmi'
 import axios from 'axios';
 import TokenSaleAdd from '../../assets/deployment/TokenSale.json'
 import USDTAdd from '../../assets/deployment/USDT.json'
@@ -22,9 +22,60 @@ import value3 from '../../assets/images/icon/value3.png'
 import value4 from '../../assets/images/icon/value4.png'
 import { formatEther, parseEther } from 'viem'
 import { useLocation } from 'react-router-dom'
+import { ethers } from "ethers";
+const { ethereum } = window
+
+
+const getnonce = async (msg, getMsg, address) => {
+    const headers = {
+        'ngrok-skip-browser-warning': '69240',
+    };
+
+    axios.get(`https://55e3-2405-4802-900b-5590-5b0e-b02a-d1b7-599.ngrok-free.app/referral?user_address=${address}`, {
+        headers: headers,
+    })
+        .then((response) => {
+            getMsg({ ...msg, ...response.data })
+        })
+        .catch((error) => {
+            console.error('Error fetching data:', error);
+        });
+}
+
+const sign = async (message, setMsghash) => {
+    const provider = new ethers.providers.Web3Provider(ethereum)
+    const signer = provider.getSigner()
+    const sig = await signer.signMessage(String(message));
+    setMsghash(sig)
+}
+
+function sign_ref_server(user_address, referral_address, signature, nonce) {
+    var formdata = new FormData();
+    formdata.append("user_address", user_address);
+    formdata.append("referral_address", referral_address);
+    formdata.append("signature", signature);
+    formdata.append("nonce", nonce);
+
+    var requestOptions = {
+        method: 'PUT',
+        body: formdata,
+        redirect: 'follow',
+        headers: {
+            'ngrok-skip-browser-warning': '449'
+        }
+    };
+
+    fetch("https://55e3-2405-4802-900b-5590-5b0e-b02a-d1b7-599.ngrok-free.app/referral", requestOptions)
+        .then(response => response.text())
+        .then(result => console.log(result))
+        .catch(error => console.log('error', error));
+}
+
 
 const Mlm = () => {
     const { address, isConnected } = useAccount()
+    const [msg, getMsg] = useState({})
+    const [msghash, setMsghash] = useState('')
     const [price, setPrice] = useState('')
     const [priceList, setPriceList] = useState([])
     const location = useLocation()
@@ -253,47 +304,79 @@ const Mlm = () => {
                 approve?.()
             }
             else {
-                buypackage?.()
-            }
+                const referalValue = new URLSearchParams(location.search).get("user_address");
 
-            console.log("Nè")
+                if (referalValue && (referalValue !== address) && address) {
+                    getnonce(msg, getMsg, address)
+                }
+                else {
+                    buypackage?.()
+                }
+            }
         }
         else {
-            setPrice(priceList[id]);
+            setPrice(priceList?.[id]);
         }
     }
 
     useEffect(() => {
-        setPriceList([...priceList, price1, price2, price3, price4])
-    }, [])
-
+        setPriceList([price1, price2, price3, price4])
+    }, [price1, price2, price3, price4])
 
     useEffect(() => {
-        const referalValue = new URLSearchParams(location.search).get("user_address");
-
-        if (referalValue && referalValue !== address && address) {
-            const headers = {
-                'ngrok-skip-browser-warning': '69240',
-            };
-
-            axios.get(`https://7d22-125-235-238-29.ngrok-free.app/referral?user_address=0x96998C9ce6b5f179829E9CFE2d4B1505E43d7F1e`, {
-                headers: headers,
-            })
-                .then((response) => {
-                    console.log(response.data);
-                })
-                .catch((error) => {
-                    console.error('Error fetching data:', error);
-                });
+        if (Boolean(msg?.data)) {
+            sign(msg?.data?.message, setMsghash)
         }
-    }, [address])
+    }, [msg])
+
+    useEffect(() => {
+        if (msghash) {
+            buypackage?.()
+        }
+    }, [msghash])
+
+    useEffect(() => {
+        if (msghash && buysucces) {
+            // const apiUrl = 'https://c767-125-235-238-29.ngrok-free.app/point/referral';
+            // const referal = new URLSearchParams(location.search).get("user_address");
+            // const data = {
+            //     user_address: String(address),
+            //     referral_address: String(referal),
+            //     signature: String(msghash),
+            //     nonce: String(msg?.data?.nonce),
+            // };
+            // const headers = {
+            //     'Content-Type': 'application/json',
+            //     'Accept:': 'application/json',
+            // };
+            // axios.put(apiUrl, data, { headers })
+            //     .then(response => {
+            //         console.log('Yêu cầu PUT thành công:', response.data);
+            //     })
+            //     .catch(error => {
+            //         console.error('Lỗi trong quá trình PUT:', error);
+            //     });
+
+            const referal = new URLSearchParams(location.search).get("user_address")
+            sign_ref_server(String(address), String(referal), String(msghash), String(msg?.data?.nonce))
+        }
+
+    }, [buyloading])
 
     useEffect(() => {
         if (Number(allowance) < Number(price)) {
             approve?.()
         }
         else {
-            buypackage?.()
+            const referalValue = new URLSearchParams(location.search).get("user_address");
+
+            if (referalValue && (referalValue !== address) && address) {
+                getnonce(msg, getMsg, address)
+            }
+
+            else {
+                buypackage?.()
+            }
         }
     }, [price])
 

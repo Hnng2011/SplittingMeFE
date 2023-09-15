@@ -93,6 +93,7 @@ function NFT({ data, address }) {
         enabled: Boolean(address) && Boolean(Market.address),
         select: (data) => formatEther(data)
     })
+
     const { config: usdtApprove } = usePrepareContractWrite({
         address: USDT.address,
         abi: [{
@@ -120,9 +121,10 @@ function NFT({ data, address }) {
             "type": "function"
         }],
         functionName: "approve",
-        args: [Market.address, parseEther(String((formatEther(pricenft?.[2]) || '0')))],
+        args: [Market.address, String((pricenft?.[2]) ?? '0')],
         enabled: Boolean(address) && Boolean(Number(allowanceusdt) < Number(pricenft?.[2])),
     })
+
     const { config: buyNFT } = usePrepareContractWrite({
         address: Market.address,
         abi: [{
@@ -161,6 +163,7 @@ function NFT({ data, address }) {
         args: [data],
         enabled: Boolean(address) && Boolean(pricenft?.[2]) && Boolean(address === String(pricenft?.[1])),
     })
+
     const { data: usdtapprove, write: approveusdt, isLoading: loadapproveusdt } = useContractWrite(usdtApprove)
     const { data: buynft, write: buy, isLoading: buynftload } = useContractWrite(buyNFT)
     const { data: cancelnft, write: cancel, isLoading: cancelload } = useContractWrite(cancelListedNFT)
@@ -168,15 +171,16 @@ function NFT({ data, address }) {
         enabled: Boolean(address),
         hash: usdtapprove?.hash,
     })
+
     const { isLoading: LoadingbuyNFT } = useWaitForTransaction({
         enabled: Boolean(address),
         hash: buynft?.hash,
     })
+
     const { isLoading: CancelNFT } = useWaitForTransaction({
         enabled: Boolean(address),
         hash: cancelnft?.hash,
     })
-
     const Purchase = () => {
         if (Number(allowanceusdt) < Number(formatEther(pricenft?.[2]))) {
             approveusdt?.()
@@ -208,7 +212,7 @@ function NFT({ data, address }) {
                         </div>
                         <div className="content">
                             <div className="position">Owner</div>
-                            <div className="name">{shortenMiddle(String(pricenft?.[1]), 12)}</div>
+                            <div className="name">{shortenMiddle(String((pricenft?.[1]) ?? '0'), 12)}</div>
                         </div>
                     </div>
                 </div>
@@ -224,7 +228,7 @@ function NFT({ data, address }) {
                 <div className="price">
                     <div className="icon"><img src={icon3} alt="images" /></div>
                     <div className="content">
-                        <div className="cash">{String(formatEther(pricenft?.[2]))}</div>
+                        <div className="cash">{String(formatEther((pricenft?.[2]) ?? 0))}</div>
                         <div className="name">USDT</div>
                     </div>
                 </div>
