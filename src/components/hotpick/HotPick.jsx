@@ -201,7 +201,7 @@ function NFT({ data, address, shop }) {
 
     return (
         <>{
-            (shop === 'Market') ?
+            (shop === 'Market' && address !== pricenft?.[1]) ?
                 <div className="col-xl-3 col-lg-4 col-md-6 col-sm-6 tf-loadmore 3d cyber">
                     <div className="sc-product style2">
                         <div className="top">

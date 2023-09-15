@@ -64,7 +64,7 @@ function Banner03(props) {
                         <h1 className="heading">
                             Spliting Me
                         </h1>
-                        <p className="sub-heading">Giải pháp bất động sản hoàn toàn mới , lần đầu tiên có mặt tại Việt Nam</p>
+                        <p className="sub-heading">Unlock Your Dream with the New Digital Real Estate Era</p>
                         <div className="btn-slider ">
                             <Link to="/marketplace" className="tf-button style-6">Explore now</Link>
                         </div>

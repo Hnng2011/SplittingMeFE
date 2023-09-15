@@ -214,7 +214,7 @@ const Pool = () => {
                             <div className="banner-liver-auction-wrap">
                                 <div className="content">
                                     <div className="heading">
-                                        <h2 className="title">Take some NFT to stake</h2>
+                                        <h2 className="title">Add some Token</h2>
                                     </div>
 
                                     <p className="sub-heading">High APR, low risk.</p>

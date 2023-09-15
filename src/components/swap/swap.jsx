@@ -11,6 +11,18 @@ import { formatEther } from 'viem'
 import { useEffect } from 'react'
 import { useDebounce } from 'use-debounce'
 
+
+function truncateAndEllipsis(text, maxLength = 20) {
+    if (typeof text !== 'string') {
+        text = text.toString(); // Chuyển đổi thành chuỗi nếu không phải là chuỗi
+    }
+    if (text.length <= maxLength) {
+        return text;
+    } else {
+        return text.substring(0, maxLength - 3) + "...";
+    }
+}
+
 function Token({ data, address, setBalance, setSymbol, handleAddActiveClass, setPool, setToken }) {
     const setData = () => {
         setPool(data)
@@ -126,15 +138,15 @@ function TokenList({ address, handleAddActiveClass, setBalance, setSymbol, setPo
 
 const Swap = () => {
     const { address } = useAccount()
-    const [quantity, setQuantity] = useState(null)
-    const [balance, setBalance] = useState(null)
+    const [quantity, setQuantity] = useState('')
+    const [balance, setBalance] = useState('')
     const [symbol, setSymbol] = useState(null)
     const [pool, setPool] = useState(null)
     const [token, setToken] = useState(null)
     const [token1, setToken1] = useState(null)
     const [token2, setToken2] = useState(null)
     const [mode, setMode] = useState(true)
-    const [finalquant] = useDebounce(quantity, 500)
+    const [finalquant] = useDebounce(quantity, 200)
     const elementRef = useRef(null);
 
     const { data: usdtbalance } = useContractRead({
@@ -425,7 +437,7 @@ const Swap = () => {
                                 <img className="arrow" src={arrow} alt="down2" />
                             </div>
                         </div>
-                        <h3>Balance: {(balance ?? 0)} {symbol}</h3>
+                        <h3>Balance: {truncateAndEllipsis((balance ?? 0), 20)} {symbol}</h3>
                     </div>
 
                     <div onClick={() => setMode(!mode)} className='swapbtn'>↕</div>
@@ -440,7 +452,7 @@ const Swap = () => {
                             </div>
                         </div>
 
-                        <h3>Balance: {(usdtbalance ?? '0')} USDT</h3>
+                        <h3>Balance: {truncateAndEllipsis((usdtbalance ?? '0'), 20)} USDT</h3>
                     </div>
                     <button disabled={!address || !quantity || (swapping && !swapsuccess) || (approving && !approvesuccess) || swapload || loadapproveusdt || loadapprovetoken || (approvingtoken && !approvetokensuccess)} onClick={() => swap()}>{((swapping && !swapsuccess) || (approving && !approvesuccess) || swapload || loadapproveusdt || loadapprovetoken || (approvingtoken && !approvetokensuccess)) ? 'Swapping' : 'Swap'}</button>
                 </div>
@@ -464,7 +476,7 @@ const Swap = () => {
                             </div>
                         </div>
 
-                        <h3>Balance: {(usdtbalance ?? '0')} USDT</h3>
+                        <h3>Balance: {truncateAndEllipsis((usdtbalance ?? '0'), 20)} USDT</h3>
 
                     </div>
 
@@ -480,7 +492,7 @@ const Swap = () => {
                                 <img className="arrow" src={arrow} alt="down2" />
                             </div>
                         </div>
-                        <h3>Balance: {(balance || '0')} {symbol}</h3>
+                        <h3>Balance: {truncateAndEllipsis((balance || '0'), 20)} {symbol}</h3>
                     </div>
                     <button disabled={!address || !quantity || (swapping && !swapsuccess) || (approving && !approvesuccess) || swapload || loadapproveusdt || loadapprovetoken || (approvingtoken && !approvetokensuccess)} onClick={() => swap()}>{((swapping && !swapsuccess) || (approving && approvesuccess) || swapload || loadapproveusdt || loadapprovetoken || (approvingtoken && !approvetokensuccess)) ? 'Swapping' : 'Swap'}</button>
                 </div>
