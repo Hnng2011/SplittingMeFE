@@ -525,7 +525,7 @@ const Mint = () => {
             'ngrok-skip-browser-warning': '555',
         };
 
-        fetch('https://7fdf-125-235-238-29.ngrok-free.app/ipfs', {
+        fetch('http://127.0.0.1:5001/ipfs', {
             method: "POST",
             headers: headers,
             body: JSON.stringify(dataToSend),
