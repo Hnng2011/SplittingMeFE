@@ -101,8 +101,6 @@ function Dashboard() {
 
                                 <div className="dashboard-content inventory content-tab">
                                     <TabPanel><div className="inner-content inventory favorite">
-                                        <img className='bg-fav' src='https://i.pinimg.com/originals/bd/46/a3/bd46a353505a4a7cafc4989578be9ce7.gif' alt='dien' />
-                                        <img className='bg-fav' src='https://i.pinimg.com/originals/4d/17/49/4d1749d39bae5c936f1e3a39a639fef1.gif' alt='dien' />
                                         <div className="table-ranking top">
                                             <div className="title-ranking">
                                                 <div className="col-rankingg"><Link to="#">ID</Link></div>
