@@ -31,7 +31,7 @@ const getnonce = async (msg, getMsg, address) => {
         'ngrok-skip-browser-warning': '69240',
     };
 
-    axios.get(`http://127.0.0.1:5001/referral?user_address=${address}`, {
+    axios.get(`http://localhost:5001/referral?user_address=${address}`, {
         headers: headers,
     })
         .then((response) => {
@@ -47,12 +47,12 @@ const getrank = async (address, getRank, getPoint) => {
         'ngrok-skip-browser-warning': '69240',
     };
 
-    axios.get(`http://127.0.0.1:5001//user/${address}`, {
+    axios.get(`http://localhost:5001/user/${address}`, {
         headers: headers,
     })
         .then((response) => {
-            getRank(response.data?.data?.total)
-            getPoint(response.data?.data?.rank)
+            getRank(response.data?.data?.rank)
+            getPoint(response.data?.data?.total)
         })
         .catch((error) => {
             console.error('Error fetching data:', error);
@@ -82,7 +82,7 @@ function sign_ref_server(user_address, referral_address, signature, nonce) {
         }
     };
 
-    fetch("http://127.0.0.1:5001/referral", requestOptions)
+    fetch("http://localhost:5001/referral", requestOptions)
         .then(response => response.text())
         .then(result => console.log(result))
         .catch(error => console.log('error', error));
@@ -495,8 +495,8 @@ const Mlm = () => {
 
             {address && <div className='getreflink' onClick={() => copy()}>Get Referal Link</div>}
             {address && <div className='informmlm'>
-                <div>Your rank: {rank}</div>
-                <div>Your Tokens: {point}</div>
+                <div>Your rank: {(rank || '0')}</div>
+                <div>Your Points: {(point || '0')}</div>
             </div>}
         </div>
     )

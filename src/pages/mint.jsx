@@ -6,8 +6,6 @@ import NFTSpl from '../assets/deployment/NFTSplittingME.json'
 import './mint.css'
 import { useDebounce } from 'use-debounce';
 import { formatEther, parseEther } from 'viem'
-import axios from 'axios';
-import { name } from 'faker/lib/locales/az';
 
 function MintTokenList(data) {
     const { address } = useAccount()
