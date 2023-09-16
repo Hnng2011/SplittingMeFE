@@ -42,6 +42,23 @@ const getnonce = async (msg, getMsg, address) => {
         });
 }
 
+const getrank = async (address, getRank, getPoint) => {
+    const headers = {
+        'ngrok-skip-browser-warning': '69240',
+    };
+
+    axios.get(`http://127.0.0.1:5001//user/${address}`, {
+        headers: headers,
+    })
+        .then((response) => {
+            getRank(response.data?.data?.total)
+            getPoint(response.data?.data?.rank)
+        })
+        .catch((error) => {
+            console.error('Error fetching data:', error);
+        });
+}
+
 const sign = async (message, setMsghash) => {
     const provider = new ethers.providers.Web3Provider(ethereum)
     const signer = provider.getSigner()
@@ -77,6 +94,8 @@ const Mlm = () => {
     const [msg, getMsg] = useState({})
     const [msghash, setMsghash] = useState('')
     const [price, setPrice] = useState('')
+    const [rank, getRank] = useState('')
+    const [point, getPoint] = useState('')
     const [priceList, setPriceList] = useState([])
     const location = useLocation()
 
@@ -319,6 +338,13 @@ const Mlm = () => {
         }
     }
 
+
+    useEffect(() => {
+        if (address) {
+            getrank(address, getRank, getPoint)
+        }
+    }, [address])
+
     useEffect(() => {
         setPriceList([price1, price2, price3, price4])
     }, [price1, price2, price3, price4])
@@ -468,6 +494,10 @@ const Mlm = () => {
             </div>
 
             {address && <div className='getreflink' onClick={() => copy()}>Get Referal Link</div>}
+            {address && <div className='informmlm'>
+                <div>Your rank: {rank}</div>
+                <div>Your Tokens: {point}</div>
+            </div>}
         </div>
     )
 }
