@@ -411,93 +411,102 @@ const Mlm = () => {
     }
 
     return (
-        <div className="mlm-container">
-            <div className="mlm">
-                <div className='outer'>
-                    <div className="mlm-bg">S</div>
-                    <div className="mlm-content">
-                        <div className='mlm-head'>Bronze</div>
-                        <div className='mlm-price'>1000$</div>
-                        <div className='mlm-details'>
-                            <div><img src={lv2} /> Level : <span>2</span></div>
-                            <div><img src={tok2} />Tokens : <span>100.100 Tokens</span></div>
-                            <div><img src={tag2} />Price : <span>$0.00999/Token</span></div>
-                            <div><img src={value2} />Cap : <span> $99.9M</span></div>
-                        </div>
-                        <div className='mlm-buy'>
-                            <button disabled={!isConnected || (approveloading && !approvesucces) || Approving || isLoading || (buyloading && !buysucces)} onClick={() => buy(1)}> {(isLoading || (buyloading && !buysucces)) ? 'Buying...' : ((approveloading && !approvesucces) || Approving) ? 'Approving' : 'Buy Now'}</button>
+        <div className='mlmall'>
+            {address &&
+                <div className='tmp'>
+                    <div className='informmlm'>
+                        <div>Your rank: {(rank || '0')}</div>
+                        <div>Your Points: {(String(point) === '9' ? 'King/Queen' : String(point) === '8' ? 'President' : String(point) === '7' ? 'CEO' : String(point) === '6' ? 'Regional Director' : String(point) === '5' ? 'Deputy Regional Director' : String(point) === '4' ? 'Sales Director' : String(point) === '3' ? 'Deputy Sales Director' : String(point) === '2' ? "Sales Active" : String(point) === '1' ? "Sales" : '0')}</div>
+                    </div>
+                    <div className='getreflink'>
+                        <div onClick={() => copy()}>Get Referal Link</div>
+                    </div>
+                </div>
+            }
+
+            <div className="mlm-container">
+                <div className="mlm">
+                    <div className='outer'>
+                        <div className="mlm-bg">S</div>
+                        <div className="mlm-content">
+                            <div className='mlm-head'>Bronze</div>
+                            <div className='mlm-price'>1000$</div>
+                            <div className='mlm-details'>
+                                <div><img src={lv2} /> Level : <span>2</span></div>
+                                <div><img src={tok2} />Tokens : <span>100.100 Tokens</span></div>
+                                <div><img src={tag2} />Price : <span>$0.00999/Token</span></div>
+                                <div><img src={value2} />Cap : <span> $99.9M</span></div>
+                            </div>
+                            <div className='mlm-buy'>
+                                <button disabled={!isConnected || (approveloading && !approvesucces) || Approving || isLoading || (buyloading && !buysucces)} onClick={() => buy(1)}> {(isLoading || (buyloading && !buysucces)) ? 'Buying...' : ((approveloading && !approvesucces) || Approving) ? 'Approving' : 'Buy Now'}</button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div className="mlm">
-                <div className='outer'>
-                    <div className="mlm-bg">S</div>
-                    <div className="mlm-content">
-                        <div className='mlm-head'>Silver</div>
-                        <div className='mlm-price'>2000$</div>
-                        <div className='mlm-details'>
-                            <div><img src={lv3} /> Level : <span>3</span></div>
-                            <div><img src={tok3} /> Tokens : <span>200.400 Tokens</span></div>
-                            <div><img src={tag3} />Price : <span>$0.00998/Token</span></div>
-                            <div><img src={value3} />Cap : <span> $99.8M</span></div>
-                        </div>
-                        <div className='mlm-buy'>
-                            <button disabled={!isConnected || (approveloading && !approvesucces) || Approving || isLoading || (buyloading && !buysucces)} onClick={() => buy(2)}> {(isLoading || (buyloading && !buysucces)) ? 'Buying...' : ((approveloading && !approvesucces) || Approving) ? 'Approving' : 'Buy Now'}</button>
+                <div className="mlm">
+                    <div className='outer'>
+                        <div className="mlm-bg">S</div>
+                        <div className="mlm-content">
+                            <div className='mlm-head'>Silver</div>
+                            <div className='mlm-price'>2000$</div>
+                            <div className='mlm-details'>
+                                <div><img src={lv3} /> Level : <span>3</span></div>
+                                <div><img src={tok3} /> Tokens : <span>200.400 Tokens</span></div>
+                                <div><img src={tag3} />Price : <span>$0.00998/Token</span></div>
+                                <div><img src={value3} />Cap : <span> $99.8M</span></div>
+                            </div>
+                            <div className='mlm-buy'>
+                                <button disabled={!isConnected || (approveloading && !approvesucces) || Approving || isLoading || (buyloading && !buysucces)} onClick={() => buy(2)}> {(isLoading || (buyloading && !buysucces)) ? 'Buying...' : ((approveloading && !approvesucces) || Approving) ? 'Approving' : 'Buy Now'}</button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div className="mlm">
-                <div className='outer'>
-                    <div className="mlm-bg">S</div>
-                    <div className="mlm-content">
-                        <div className='mlm-head'>Gold</div>
-                        <div className='mlm-price'>4500$</div>
-                        <div className='mlm-details'>
-                            <div><img src={lv4} /> Level : <span>4</span></div>
-                            <div> <img src={tok4} /> Tokens : <span>452.261 Tokens</span></div>
-                            <div><img src={tag4} />Price : <span>$0.00995/Token</span></div>
-                            <div><img src={value4} />Cap : <span> $99.5M</span></div>
-                        </div>
-                        <div className='mlm-buy'>
-                            <button disabled={!isConnected || (approveloading && !approvesucces) || Approving || isLoading || (buyloading && !buysucces)} onClick={() => buy(3)}> {(isLoading || (buyloading && !buysucces)) ? 'Buying...' : ((approveloading && !approvesucces) || Approving) ? 'Approving' : 'Buy Now'}</button>
+                <div className="mlm">
+                    <div className='outer'>
+                        <div className="mlm-bg">S</div>
+                        <div className="mlm-content">
+                            <div className='mlm-head'>Gold</div>
+                            <div className='mlm-price'>4500$</div>
+                            <div className='mlm-details'>
+                                <div><img src={lv4} /> Level : <span>4</span></div>
+                                <div> <img src={tok4} /> Tokens : <span>452.261 Tokens</span></div>
+                                <div><img src={tag4} />Price : <span>$0.00995/Token</span></div>
+                                <div><img src={value4} />Cap : <span> $99.5M</span></div>
+                            </div>
+                            <div className='mlm-buy'>
+                                <button disabled={!isConnected || (approveloading && !approvesucces) || Approving || isLoading || (buyloading && !buysucces)} onClick={() => buy(3)}> {(isLoading || (buyloading && !buysucces)) ? 'Buying...' : ((approveloading && !approvesucces) || Approving) ? 'Approving' : 'Buy Now'}</button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div className="mlm">
-                <div className='outer'>
-                    <div className="mlm-bg">S</div>
-                    <div className="mlm-content">
-                        <div className='hot'>Hot
-                        </div>
-                        <div className='mlm-head'>Basic</div>
-                        <div className='mlm-price'>
-                            100%
-                            <div id='statusbar'>10$ for 10000 User <div className='status' style={statusstyle}></div><div>{String(slot)} User Buy</div></div>
-                        </div>
-                        <div className='mlm-details'>
-                            <div><img src={lv1} />Level : <span>1</span></div>
-                            <div><img src={tok1} /> Tokens : <span>100.100 Tokens</span></div>
-                            <div><img src={tag1} />Price : <span>$0.00999/Token</span></div>
-                            <div><img src={value1} />Cap : <span> $100M</span></div>
-                        </div>
-                        <div className='mlm-buy'>
-                            <button disabled={!isConnected || (approveloading && !approvesucces) || Approving || isLoading || (buyloading && !buysucces)} onClick={() => buy(0)}> {(isLoading || (buyloading && !buysucces)) ? 'Buying...' : ((approveloading && !approvesucces) || Approving) ? 'Approving...' : 'Buy Now'}</button>
+                <div className="mlm">
+                    <div className='outer'>
+                        <div className="mlm-bg">S</div>
+                        <div className="mlm-content">
+                            <div className='hot'>Hot
+                            </div>
+                            <div className='mlm-head'>Basic</div>
+                            <div className='mlm-price'>
+                                100%
+                                <div id='statusbar'>10$ for 10000 User <div className='status' style={statusstyle}></div><div>{String(slot)} User Buy</div></div>
+                            </div>
+                            <div className='mlm-details'>
+                                <div><img src={lv1} />Level : <span>1</span></div>
+                                <div><img src={tok1} /> Tokens : <span>100.100 Tokens</span></div>
+                                <div><img src={tag1} />Price : <span>$0.00999/Token</span></div>
+                                <div><img src={value1} />Cap : <span> $100M</span></div>
+                            </div>
+                            <div className='mlm-buy'>
+                                <button disabled={!isConnected || (approveloading && !approvesucces) || Approving || isLoading || (buyloading && !buysucces)} onClick={() => buy(0)}> {(isLoading || (buyloading && !buysucces)) ? 'Buying...' : ((approveloading && !approvesucces) || Approving) ? 'Approving...' : 'Buy Now'}</button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            {address && <div className='getreflink' onClick={() => copy()}>Get Referal Link</div>}
-            {address && <div className='informmlm'>
-                <div>Your rank: {(rank || '0')}</div>
-                <div>Your Points: {(point || '0')}</div>
-            </div>}
+            </div>
         </div>
     )
 }
