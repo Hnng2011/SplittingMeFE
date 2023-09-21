@@ -3685,9 +3685,8 @@ textarea {
 
 @media (max-width: 991px) {
     .NFTswicthToken {
-        display: flex;
         height: fit-content;
-        grid-column: span 3;
+        grid-column: span 7;
     }
 
 
@@ -3696,5 +3695,28 @@ textarea {
         grid-column-start: 2;
         grid-column-end: 11;
         grid-row-start: 2;
+    }
+
+    .mint_nft input {
+        width: 70%;
+        height: 20%;
+    }
+
+    .mint_nft textarea {
+        width: 70%;
+        height: 10vh;
+        margin: 0;
+        border-radius: 0;
+        border-bottom: 1px solid white;
+    }
+    .mint_nft img {
+        margin-bottom: 2vh;
+    }
+
+    .buttonmintnft {
+        display: flex;
+        width: 100%;
+        justify-content: space-evenly;
+        margin-top: 2vh;
     }
 }

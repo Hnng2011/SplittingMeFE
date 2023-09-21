@@ -106,7 +106,6 @@
 .mlm:nth-child(4) {
     grid-row-start: 1;
     grid-row-end: 2;
-    grid-column: span 3;
 }
 
 .mlm:nth-child(4) .mlm-buy button {
@@ -166,6 +165,10 @@
     -webkit-text-stroke-color: gold;
 }
 
+.mlm:nth-child(4) {
+    -webkit-text-stroke-color: rgb(0, 128, 255);
+}
+
 .mlm:hover {
     outline: none;
 }
@@ -182,6 +185,9 @@
     box-shadow: 20px 20px 10px gold;
 }
 
+.mlm:nth-child(4):hover {
+    box-shadow: 20px 20px 10px rgb(0, 128, 255);
+}
 
 .mlm-content {
     width: 100%;
@@ -213,6 +219,11 @@
     border-bottom: 2px solid gold;
 }
 
+.mlm:nth-child(4) .mlm-head {
+    color: rgb(0, 128, 255);
+    border-bottom: 2px solid rgb(0, 128, 255);
+}
+
 
 .mlm-price {
     height: 40%;
@@ -223,50 +234,7 @@
 }
 
 
-.mlm:nth-child(4) .mlm-head {
-    width: 10%;
-    margin-bottom: 1%;
-    border-bottom: 2px solid rgb(0, 128, 255);
-}
 
-.mlm:nth-child(4) .mlm-price {
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    flex-direction: column;
-    gap: 30%;
-    font-size: 90px;
-}
-
-
-.mlm:nth-child(4) .mlm-price div:nth-child(1) {
-    width: 80%;
-    text-align: center;
-    display: flex;
-    align-items: center;
-    line-height: 100%;
-    font-size: 25px;
-    opacity: 0.8;
-}
-
-.mlm:nth-child(4) .mlm-price div .status {
-    height: 0;
-    margin: 0 2%;
-    border: 10px solid rgb(0, 128, 255);
-    border-radius: 20px;
-    opacity: 0.8;
-}
-
-
-.mlm:nth-child(4) .mlm-bg {
-    top: 70%;
-    right: -2%;
-    -webkit-text-stroke-color: rgb(0, 128, 255);
-}
-
-.mlm:nth-child(4) .mlm-details {
-    height: 25%;
-}
 
 
 .mlm-details {
@@ -407,7 +375,7 @@ button:disabled:hover {
 
     .mlm:nth-child(4) {
         grid-column-start: 1;
-        grid-column-end: 3;
+        grid-column-end: 2;
     }
 
     #statusbar {

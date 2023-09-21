@@ -123,7 +123,7 @@ function Dashboard() {
                                                                 </div>
 
                                                                 <div className="col-rankingg">
-                                                                    <button onClick={() => setSell(String(id))} className='sell-btn dp-none'>Sell</button>
+                                                                    <button onClick={() => setSell(String(id))} className='sell-btn'>Sell</button>
                                                                 </div>
                                                             </div>
                                                         )
