@@ -1953,10 +1953,15 @@ button:hover:disabled {
   padding: 10px;
   border-radius: 15px;
   overflow: hidden;
-  width: 30%;
+  width: 28%;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.button-cus:hover {
+  opacity: 0.8 !important;
+  color: black !important;
 }
 
 .button-popup {

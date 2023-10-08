@@ -342,7 +342,9 @@ function HotPick({ data, mode }) {
                             <div className="row tf-filter-container wow fadeInUp">
                                 {
                                     data?.map(idx => (
-                                        <NFT data={String(idx)} address={address} shop={mode} />
+
+                                        <NFT data={String(idx)} address={address} shop={mode} key={idx} />
+
                                     ))
                                 }
                             </div>
