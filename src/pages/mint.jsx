@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import React from 'react';
 import { useAccount } from 'wagmi';
 import { useContractWrite, usePrepareContractWrite, useContractRead, useWaitForTransaction } from 'wagmi'
 import AddSlot from '../assets/deployment/FactoryToken.json'
@@ -523,7 +524,7 @@ const Mint = () => {
             'ngrok-skip-browser-warning': '555',
         };
 
-        fetch('http://127.0.0.1:5001/ipfs', {
+        fetch(`${process.env.REACT_APP_API_URL}/ipfs`, {
             method: "POST",
             headers: headers,
             body: JSON.stringify(dataToSend),
@@ -548,7 +549,7 @@ const Mint = () => {
             <div className='NFTswicthToken'>
                 <button onClick={() => handleChangeMode('NFT')} className={mode === 'NFT' ? 'active_switch' : ''}>Mint NFT</button>
                 <button onClick={() => handleChangeMode('Token')} className={mode === 'Token' ? 'active_switch' : ''}>Mint Token</button>
-                {address === '0x96998C9ce6b5f179829E9CFE2d4B1505E43d7F1e' && <button onClick={() => handleChangeMode('Admin')} className={mode === 'Admin' ? 'active_switch' : ''}>Admin</button>}
+                {address === String(process.env.REACT_APP_ADMIN_WALLET) && <button onClick={() => handleChangeMode('Admin')} className={mode === 'Admin' ? 'active_switch' : ''}>Admin</button>}
             </div>
 
             {

@@ -39,9 +39,6 @@ function Footer() {
                     <div className="col-xl-4 col-lg-3 col-md-3">
                         <div className="widget widget-infor">
                             <img className="logo" id='logo_header' src={imgsrc} />
-
-
-
                             <ul className="social-item">
                                 <li><Link to="#"><i className="fab fa-twitter"></i></Link></li>
                                 <li><Link to="#"><i className="fab fa-facebook"></i></Link></li>

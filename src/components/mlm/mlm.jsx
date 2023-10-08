@@ -4,10 +4,6 @@ import { usePrepareContractWrite, useContractWrite, useAccount, useContractRead,
 import axios from 'axios';
 import TokenSaleAdd from '../../assets/deployment/TokenSale.json'
 import USDTAdd from '../../assets/deployment/USDT.json'
-import lv1 from '../../assets/images/icon/level1.png'
-import lv2 from '../../assets/images/icon/level2.png'
-import lv3 from '../../assets/images/icon/level3.png'
-import lv4 from '../../assets/images/icon/level4.png'
 import tok1 from '../../assets/images/icon/token1.png'
 import tok2 from '../../assets/images/icon/token2.png'
 import tok3 from '../../assets/images/icon/token3.png'
@@ -16,10 +12,6 @@ import tag1 from '../../assets/images/icon/tag1.png'
 import tag2 from '../../assets/images/icon/tag2.png'
 import tag3 from '../../assets/images/icon/tag3.png'
 import tag4 from '../../assets/images/icon/tag4.png'
-import value1 from '../../assets/images/icon/value1.png'
-import value2 from '../../assets/images/icon/value2.png'
-import value3 from '../../assets/images/icon/value3.png'
-import value4 from '../../assets/images/icon/value4.png'
 import { formatEther, parseEther } from 'viem'
 import { useLocation } from 'react-router-dom'
 import { ethers } from "ethers";
@@ -31,7 +23,7 @@ const getnonce = async (msg, getMsg, address) => {
         'ngrok-skip-browser-warning': '69240',
     };
 
-    axios.get(`http://localhost:5001/referral?user_address=${address}`, {
+    axios.get(`${process.env.REACT_APP_API_URL}/referral?user_address=${address}`, {
         headers: headers,
     })
         .then((response) => {
@@ -47,7 +39,7 @@ const getrank = async (address, getRank, getPoint) => {
         'ngrok-skip-browser-warning': '69240',
     };
 
-    axios.get(`http://localhost:5001/user/${address}`, {
+    axios.get(`${process.env.REACT_APP_API_URL}/user/${address}`, {
         headers: headers,
     })
         .then((response) => {
@@ -82,7 +74,7 @@ function sign_ref_server(user_address, referral_address, signature, nonce) {
         }
     };
 
-    fetch("http://localhost:5001/referral", requestOptions)
+    fetch(`${process.env.REACT_APP_API_URL}/referral`, requestOptions)
         .then(response => response.text())
         .then(result => console.log(result))
         .catch(error => console.log('error', error));
@@ -103,24 +95,6 @@ const Mlm = () => {
         navigator.clipboard.writeText(window.location.href.split('?')[0] + `?user_address=${address}`)
     }
 
-    const { data: slot } = useContractRead({
-        address: TokenSaleAdd.address,
-        abi: [{
-            "inputs": [],
-            "name": "checkSlotBasic",
-            "outputs": [
-                {
-                    "internalType": "uint256",
-                    "name": "",
-                    "type": "uint256"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-        },],
-        functionName: 'checkSlotBasic',
-        watch: true,
-    });
     const { data: price1 } = useContractRead({
         address: TokenSaleAdd.address,
         abi: [{
